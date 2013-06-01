@@ -29,6 +29,8 @@ def topojson():
     Create a single topojson file from every shapefile.
     """
     shapefiles = _f('data/shapefiles/*.shp')
+    local('topojson --id-property DM -o %s -- %s' % (_f('data/drought.json'), shapefiles))
+
 
 def update_shapefiles():
     """
