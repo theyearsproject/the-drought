@@ -1,0 +1,19 @@
+{
+  "name": "drought",
+  "version": "0.0.0",
+  "description": "An interactive map of the US drought",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Chris Amico",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "d925c18dec533813281f68da272c951bbd19ef6d",
+  "dependencies": {
+    "canvas": "~1.0.2",
+    "topojson": "~1.1.3"
+  },
+  "devDependencies": {}
+}
