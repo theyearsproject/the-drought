@@ -65,6 +65,7 @@ function render(err, us, drought) {
 };
 
 function update(week) {
+    console.time('update');
     var dm = data.weeks[week];
 
     map.selectAll('path.drought')
@@ -72,4 +73,5 @@ function update(week) {
         .attr('d', path);
 
     map.selectAll('path.states').attr('d', path);
+    console.timeEnd('update');
 }
