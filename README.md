@@ -42,3 +42,20 @@ That last part isn't going to work in IE8. Have to find out if it needs to.
 
 Also, Backbone could provide some useful eventing and routing. Permalinks would be useful here.
 
+
+
+TODO:
+-----
+
+ - render a map in AlbersUsa projection using D3 and node-canvas
+ - render a muliticolored drought map this way
+ - build a script that renders a multicolored drought map based on shapefile/geojson input
+ - update fabfile (or Makefile) to download latest data from USDM and convert to a useable format
+ - write script (fab, make, etc) to download, convert data, render all maps
+
+
+
+
+
+
+
