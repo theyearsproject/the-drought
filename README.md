@@ -47,10 +47,9 @@ Also, Backbone could provide some useful eventing and routing. Permalinks would 
 TODO:
 -----
 
- - build a script that renders a multicolored drought map based on shapefile/geojson input
  - update fabfile (or Makefile) to download latest data from USDM and convert to a useable format
  - write script (fab, make, etc) to download, convert data, render all maps
-
+ - build a slider that flips through map images, creating an animation
 
 
 
