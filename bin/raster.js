@@ -6,7 +6,10 @@ var Canvas = require('canvas')
   , path = require('path')
   , queue = require('queue-async')
   , topojson = require('topojson')
-  , week = process.argv[2];
+
+// input and output
+var week = process.argv[2]
+  , file = fs.createWriteStream(process.argv[3]);
 
 var DATA_DIR = path.resolve(__dirname, '..', 'data');
 
@@ -15,8 +18,6 @@ var width = 960
 
 var canvas = new Canvas(width, height)
   , context = canvas.getContext('2d');
-
-// var file = fs.createWriteStream(process.argv[2]);
 
 var colors = {
     black: "#000",
@@ -31,13 +32,14 @@ var colors = {
 
 var projection = d3.geo.albersUsa()
     .scale(1280)
-    .translate([width / 2, height / 2]);
+    .translate([width / 2, height / 2])
+    .precision(0);
 
 var geopath = d3.geo.path()
     .projection(projection)
-    .context(context)
-    .pointRadius(2.5);
+    .context(context);
 
+// let's do this
 queue()
     .defer(fs.readFile, path.join(DATA_DIR, 'us.json'))
     .defer(fs.readFile, path.join(DATA_DIR, 'drought.json'))
@@ -61,8 +63,8 @@ function render(err, us, drought) {
 
     context.beginPath();
     geopath(land);
-    context.stroke();
     context.fill();
+    context.stroke();
 
     var weekly = topojson.feature(drought, drought.objects[week]);
     weekly.features.forEach(function(feature) {
@@ -85,7 +87,7 @@ function render(err, us, drought) {
     geopath(states); 
     context.stroke();
 
-    canvas.pngStream().pipe(process.stdout);
+    canvas.pngStream().pipe(file);
 }
 
 
