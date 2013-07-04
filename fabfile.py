@@ -29,11 +29,20 @@ def freeze():
     print reqs
 
 
-def raster(week=None):
+def raster(week):
     """
     Create a raster image for a given weekly drought snapshot.
     """
+    cmd = _f('bin/raster.js')
+    dest = _f('img/drought/%s.png' % week)
+    local('%s %s %s' % (cmd, week, dest))
 
+def raster_all():
+    """
+    Raster all weekly snapshots.
+    """
+    for week in weeks():
+        pass
 
 def reproject(infile):
     """
