@@ -13,9 +13,12 @@
   "gitHead": "d925c18dec533813281f68da272c951bbd19ef6d",
   "dependencies": {
     "canvas": "~1.0.2",
-    "d3": "3.2.3",
+    "d3": "~3.2.3",
+    "glob": "~3.2.1",
+    "optimist": "~0.6.0",
     "queue-async": "~1.0.4",
-    "topojson": "~1.1.3"
+    "topojson": "~1.1.3",
+    "shapefile": "~0.1.3"
   },
   "devDependencies": {},
   "bin": {

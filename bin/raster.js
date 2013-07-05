@@ -3,21 +3,17 @@
 var Canvas = require('canvas')
   , d3 = require('d3')
   , fs = require('fs')
+  , glob = require('glob')
   , path = require('path')
   , queue = require('queue-async')
-  , topojson = require('topojson')
+  , shapefile = require('shapefile')
+  , topojson = require('topojson');
 
-// input and output
-var week = process.argv[2]
-  , file = fs.createWriteStream(process.argv[3]);
-
-var DATA_DIR = path.resolve(__dirname, '..', 'data');
+var DATA_DIR = path.resolve(__dirname, '..', 'data')
+  , IMG_DIR = path.resolve(__dirname, '..', 'img/drought');
 
 var width = 960
   , height = 600;
-
-var canvas = new Canvas(width, height)
-  , context = canvas.getContext('2d');
 
 var colors = {
     black: "#000",
@@ -35,25 +31,38 @@ var projection = d3.geo.albersUsa()
     .translate([width / 2, height / 2])
     .precision(0);
 
-var geopath = d3.geo.path()
-    .projection(projection)
-    .context(context);
-
 // let's do this
 queue()
     .defer(fs.readFile, path.join(DATA_DIR, 'us.json'))
-    .defer(fs.readFile, path.join(DATA_DIR, 'drought.json'))
+    .defer(glob, path.join(DATA_DIR, 'shapefiles', '*.shp'))
     .await(render);
 
-function render(err, us, drought) {
+function render(err, us, shapefiles) {
     if (err) throw err;
 
     // parse all our json
     us = JSON.parse(us);
-    drought = JSON.parse(drought);
+    shapefiles.forEach(function(filename) {
+        raster(us, filename);
+    });
+}
+
+function raster(us, filename) {
+    // render a png image from a US topojson object
+    // and a shapefile path
+    var canvas = new Canvas(width, height)
+      , context = canvas.getContext('2d');
+
+    var geopath = d3.geo.path()
+        .projection(projection)
+        .context(context);
 
     var states = topojson.feature(us, us.objects.states)
       , land = topojson.feature(us, us.objects.land);
+
+    // get an outfile
+    var name = path.basename(filename, '.shp')
+      , file = fs.createWriteStream(path.join(IMG_DIR, name + '.png'));
 
     // fill in land
     context.fillStyle = colors.land;
@@ -66,28 +75,34 @@ function render(err, us, drought) {
     context.fill();
     context.stroke();
 
-    var weekly = topojson.feature(drought, drought.objects[week]);
-    weekly.features.forEach(function(feature) {
-        var color = colors['DM-' + feature.id];
-        context.fillStyle = color;
-        context.strokeStyle = color;
-        context.beginPath();
-        geopath(feature);
-        context.stroke();
-        context.fill();
-    });
+    shapefile.readStream(filename)
+        .on('error', function(err) { throw err; })
+        .on('feature', function(feature) {
+            // draw this drought region
+            var color = colors['DM-' + feature.properties.DM];
+            context.fillStyle = color;
+            context.strokeStyle = color;
+            
+            // draw the path
+            context.beginPath();
+            geopath(feature);
+            context.stroke();
+            context.fill();
 
-    // draw statelines over drought colors
-    context.fillStyle = colors.border;
-    context.strokeStyle = colors.border;
-    context.lineWidth = 0.75;
-    context.lineJoin = "round";
+        })
+        .on('end', function() {
+            // draw statelines over drought colors
+            context.fillStyle = colors.border;
+            context.strokeStyle = colors.border;
+            context.lineWidth = 0.75;
+            context.lineJoin = "round";
 
-    context.beginPath();
-    geopath(states); 
-    context.stroke();
+            context.beginPath();
+            geopath(states);
+            context.stroke();
 
-    canvas.pngStream().pipe(file);
+            // then write the final file
+            canvas.pngStream().pipe(file);
+        });
 }
-
 
