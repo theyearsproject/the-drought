@@ -1,5 +1,6 @@
 import datetime
 import glob
+import json
 import os
 from fabric.api import *
 
@@ -75,14 +76,8 @@ def update_shapefiles(year=2013):
     # need to make this generic
     zipfile = _f('data/raw', year + '.zip')
     local('curl %s > %s' % (url, zipfile))
-    # local('wget %s' % url)
-
-    # this'll get less hard-coded later 
-    # move the downloaded zip file to ./data/raw
-    # local('mv usdm2013.zip %s' % (_f('data/raw')))
 
     # unzip files into a year directory, just to keep things sane
-    #local('unzip %s -d %s' % (zipfile, _f('data/raw/', str(year))))
     dest = _f('data/raw/', year)
     local('unzip -u -d %s %s' % (dest, zipfile))
 
@@ -102,3 +97,15 @@ def weeks():
         name = os.path.basename(shapefile)
         name, ext = os.path.splitext(name)
         yield name
+
+
+def weeksjs():
+    """
+    Render a javascript file for weekly shapefile names.
+    """
+    outfile = _f('js/weeks.js')
+    js = "var WEEKS = %s;" % json.dumps(list(weeks()), indent=4)
+    with open(outfile, 'wb') as f:
+        f.write(js)
+
+

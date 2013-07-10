@@ -12,8 +12,9 @@ var Canvas = require('canvas')
 var DATA_DIR = path.resolve(__dirname, '..', 'data')
   , IMG_DIR = path.resolve(__dirname, '..', 'img/drought');
 
-var width = 960
-  , height = 600;
+var scale = .75
+  , width = 960 * scale
+  , height = 600 * scale;
 
 var colors = {
     black: "#000",
@@ -27,7 +28,7 @@ var colors = {
 };
 
 var projection = d3.geo.albersUsa()
-    .scale(1280)
+    .scale(1280 * scale)
     .translate([width / 2, height / 2])
     .precision(0);
 
