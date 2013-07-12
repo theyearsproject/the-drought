@@ -39,12 +39,15 @@ queue()
     .await(render);
 
 function render(err, us, shapefiles) {
-    if (err) throw err;
+    if (err) {throw err;}
 
     // parse all our json
     us = JSON.parse(us);
     shapefiles.forEach(function(filename) {
-        raster(us, filename);
+        try { raster(us, filename); }
+        catch(err) {
+            console.error(err);
+        }
     });
 }
 
@@ -77,7 +80,9 @@ function raster(us, filename) {
     context.stroke();
 
     shapefile.readStream(filename)
-        .on('error', function(err) { throw err; })
+        .on('error', function(err) { 
+            console.error(err); 
+        })
         .on('feature', function(feature) {
             // draw this drought region
             var color = colors['DM-' + feature.properties.DM];
@@ -104,6 +109,7 @@ function raster(us, filename) {
 
             // then write the final file
             canvas.pngStream().pipe(file);
+            console.log('Wrote: %s', filename);
         });
 }
 

@@ -2,12 +2,14 @@ import datetime
 import glob
 import json
 import os
+import urllib
+
 from fabric.api import *
 
 DATE_FORMAT = "usdm%y%m%d"
 ROOT = os.path.realpath(os.path.dirname(__file__))
 URL = "http://droughtmonitor.unl.edu/shapefiles_combined/2013/usdm%i.zip"
-YEARS = range(2000, 2013)
+YEARS = range(2000, 2014)
 
 _f = lambda *fn: os.path.join(ROOT, *fn)
 
@@ -53,6 +55,15 @@ def reproject(infile):
     local('ogr2ogr -t_srs EPSG:4326 %(outfile)s %(infile)s' % files)
 
 
+def reproject_all():
+    """
+    Find all the shapefiles with glob, and loop through them
+    reproject each one
+    """
+    for shp in glob.iglob(_f('data/raw/**/*.shp')):
+        reproject(shp)
+
+
 def topojson():
     """
     Create a single topojson file from every shapefile.
@@ -65,7 +76,7 @@ def update_shapefiles(year=2013):
     """
     Download, unzip and reproject all shapefiles from US Drought Monitor
     """
-    url = URL % year
+    url = URL % int(year)
     year = str(year)
 
     # ensure directories exist
@@ -81,10 +92,18 @@ def update_shapefiles(year=2013):
     dest = _f('data/raw/', year)
     local('unzip -u -d %s %s' % (dest, zipfile))
 
-    # find all the shapefiles with glob, and loop through them
-    # reproject each one
-    for shp in glob.glob(_f('data/raw/', year, '*.shp')):
-        reproject(shp)
+    reproject_all()
+
+
+def update(start=2000, end=2013):
+    """
+    Run update_shapefiles for years between start and end.
+    """
+    start = int(start)
+    end = int(end)
+
+    for year in range(start, end + 1):
+        update_shapefiles(year)
 
 
 def weeks():
