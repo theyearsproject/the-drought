@@ -43,15 +43,28 @@ function render(err, us, shapefiles) {
 
     // parse all our json
     us = JSON.parse(us);
+
+    // queue up files to render
+    // two years at a time
+    var q = queue(52 * 2);
     shapefiles.forEach(function(filename) {
+        /***
         try { raster(us, filename); }
         catch(err) {
             console.error(err);
         }
+        ***/
+        q.defer(raster, us, filename);
+    });
+
+    // let me know when we're done
+    q.awaitAll(function(err, filenames) {
+        if (err) { throw err; }
+        console.log('Rendered %i files', filenames.length);
     });
 }
 
-function raster(us, filename) {
+function raster(us, filename, callback) {
     // render a png image from a US topojson object
     // and a shapefile path
     var canvas = new Canvas(width, height)
@@ -77,7 +90,7 @@ function raster(us, filename) {
 
     shapefile.readStream(filename)
         .on('error', function(err) { 
-            console.error(err); 
+            callback(err); 
         })
         .on('feature', function(feature) {
             // draw this drought region
@@ -104,12 +117,15 @@ function raster(us, filename) {
             context.stroke();
 
             // get an outfile
-            var name = path.basename(filename, '.shp')
+            var name = path.basename(filename, '.shp').toLowerCase()
               , file = fs.createWriteStream(path.join(IMG_DIR, name + '.png'));
 
             // then write the final file
             canvas.pngStream().pipe(file);
-            console.log('Wrote: %s', filename);
+            console.info('Rendered: %s', filename);
+
+            // run the callback with no error and pass the filename along
+            callback(null, filename);
         });
 }
 
