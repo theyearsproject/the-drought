@@ -64,10 +64,6 @@ function raster(us, filename) {
     var states = topojson.feature(us, us.objects.states)
       , land = topojson.feature(us, us.objects.land);
 
-    // get an outfile
-    var name = path.basename(filename, '.shp')
-      , file = fs.createWriteStream(path.join(IMG_DIR, name + '.png'));
-
     // fill in land
     context.fillStyle = colors.land;
     context.strokeStyle = colors.border;
@@ -106,6 +102,10 @@ function raster(us, filename) {
             context.beginPath();
             geopath(states);
             context.stroke();
+
+            // get an outfile
+            var name = path.basename(filename, '.shp')
+              , file = fs.createWriteStream(path.join(IMG_DIR, name + '.png'));
 
             // then write the final file
             canvas.pngStream().pipe(file);
