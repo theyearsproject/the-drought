@@ -55,6 +55,15 @@ def reproject(infile):
     local('ogr2ogr -t_srs EPSG:4326 %(outfile)s %(infile)s' % files)
 
 
+def reproject_year(year):
+    """
+    Project shapefiles for a single year.
+    """
+    year = str(year)
+    for shp in glob.iglob(_f('data/raw', year, '*.shp')):
+        reproject(shp)
+
+
 def reproject_all():
     """
     Find all the shapefiles with glob, and loop through them
@@ -92,7 +101,7 @@ def update_shapefiles(year=2013):
     dest = _f('data/raw/', year)
     local('unzip -u -d %s %s' % (dest, zipfile))
 
-    reproject_all()
+    reproject_year(year)
 
 
 def update(start=2000, end=2013):
