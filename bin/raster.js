@@ -12,9 +12,18 @@ var Canvas = require('canvas')
 var DATA_DIR = path.resolve(__dirname, '..', 'data')
   , IMG_DIR = path.resolve(__dirname, '..', 'img/drought');
 
-var scale = .75
-  , width = 960 * scale
-  , height = 600 * scale;
+var argv = require('optimist')
+    .default({ 
+        height: 960, 
+        width: 600, 
+        scale: .75, 
+        year: null })
+    .argv;
+
+var scale = argv.scale
+  , width = argv.width * scale
+  , height = argv.height * scale
+  , year = argv.year;
 
 var colors = {
     black: "#000",
@@ -32,10 +41,14 @@ var projection = d3.geo.albersUsa()
     .translate([width / 2, height / 2])
     .precision(0);
 
+var shapepath = year ?
+    d3.time.format('usdm%y*.shp')(new Date(year, 1, 1)) :
+    "*.shp";
+
 // let's do this
 queue()
     .defer(fs.readFile, path.join(DATA_DIR, 'us.json'))
-    .defer(glob, path.join(DATA_DIR, 'shapefiles', '*.shp'))
+    .defer(glob, path.join(DATA_DIR, 'shapefiles', shapepath))
     .await(render);
 
 function render(err, us, shapefiles) {
@@ -47,20 +60,15 @@ function render(err, us, shapefiles) {
     // queue up files to render
     // two years at a time
     var q = queue(52 * 2);
+
     shapefiles.forEach(function(filename) {
-        /***
-        try { raster(us, filename); }
-        catch(err) {
-            console.error(err);
-        }
-        ***/
         q.defer(raster, us, filename);
     });
 
     // let me know when we're done
     q.awaitAll(function(err, filenames) {
         if (err) { throw err; }
-        console.log('Rendered %i files', filenames.length);
+        console.log('Rendered %s files', filenames.length);
     });
 }
 
@@ -122,7 +130,7 @@ function raster(us, filename, callback) {
 
             // then write the final file
             canvas.pngStream().pipe(file);
-            console.info('Rendered: %s', filename);
+            console.log('Rendered: %s', name + '.png');
 
             // run the callback with no error and pass the filename along
             callback(null, filename);

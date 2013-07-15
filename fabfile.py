@@ -36,7 +36,8 @@ def raster():
     """
     Create a raster image for each weekly drought snapshot.
     """
-    local(_f('bin/raster.js'))
+    for year in YEARS:
+        local(_f('bin/raster.js --year %i' % year))
 
 
 def reproject(infile):
