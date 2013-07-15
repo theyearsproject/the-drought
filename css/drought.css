@@ -3,11 +3,11 @@
     height: 550px;
 }
 
-.DM-0 { fill: rgb(255, 255, 0); }
-.DM-1 { fill: rgb(252, 211, 127); }
-.DM-2 { fill: rgb(255, 170, 0); }
-.DM-3 { fill: rgb(230, 0, 0); }
-.DM-4 { fill: rgb(115, 0, 0); }
+.DM-0, .D0-D4 { fill: rgb(255, 255, 0); }
+.DM-1, .D1-D4 { fill: rgb(252, 211, 127); }
+.DM-2, .D2-D4 { fill: rgb(255, 170, 0); }
+.DM-3, .D3-D4 { fill: rgb(230, 0, 0); }
+.DM-4, .D4 { fill: rgb(115, 0, 0); }
 
 .states {
     fill: none;

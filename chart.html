@@ -5,7 +5,21 @@
 
     <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap-responsive.css">
+    <link rel="stylesheet" type="text/css" href="css/drought.css">
+    <style type="text/css">
+    svg {
+        font-family: sans-serif;
+        font-size: 10px;
+    }
 
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #444;
+        stroke-width: .5;
+    }
+
+    </style>
 </head>
 <body>
 	<div class="container">
@@ -18,9 +32,105 @@
     
     <script src="js/weeks.js"></script>
     <script src="components/underscore/underscore.js"></script>
+    <script src="components/moment/moment.js"></script>
     <script src="components/d3/d3.min.js"></script>
     <script type="text/javascript">
+    var url = "data/csv/us.csv"
+      , margin = {top: 25, right: 50, bottom: 25, left: 50}
+      , height = 400 - margin.top - margin.bottom
+      , width = parseInt(d3.select('#chart').style('width'))
+      , width = width - margin.left - margin.right;
 
+    var formats = {
+        file: d3.time.format('usdm%y%m%d'),
+        date: d3.time.format('%b %d, %Y'),
+        week: d3.time.format('%Y-%m-%d')
+    };
+
+    // scales and axes
+    var dates = _.map(WEEKS, function(d) {
+        return formats.file.parse(d);
+    });
+
+    var drought = {
+        'DM-0': [],
+        'DM-1': [],
+        'DM-2': [],
+        'DM-3': [],
+        'DM-4': []
+    };
+
+    var levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
+
+    var x = d3.time.scale()
+        .domain(d3.extent(dates))
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .domain([0, 100]) // dealing in percents
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .orient('bottom')
+        .scale(x)
+        .tickFormat(formats.date);
+
+    var yAxis = d3.svg.axis()
+        .orient('left')
+        .scale(y)
+        .tickFormat(function(d) { return d + '%'; });
+
+    var area = function(accessor) {
+        var a = d3.svg.area()
+            .x(function(d) { return x(d.Week); })
+            .y0(height)
+            .y1(function(d) { return y(d[accessor]); });
+
+        return a;
+    }
+
+    var svg = d3.select('#chart').append('svg')
+        .style('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform', translate(margin.left, margin.top));
+
+    svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', translate(0, height))
+        .call(xAxis);
+
+    svg.append('g')
+        .attr('class', 'y axis')
+        .call(yAxis);
+
+    d3.csv(url).row(function(d) {
+        // numerize
+        // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
+        d.Week = formats.week.parse(d.Week);
+        d.Nothing = +d.Nothing;
+        d['D0-D4'] = +d['D0-D4'];
+        d['D1-D4'] = +d['D1-D4'];
+        d['D2-D4'] = +d['D3-D4'];
+        d['D4'] = +d['D4'];
+
+        return d;
+
+    }).get(function(err, data) {
+        // render the chart
+        window.data = data;
+
+        _.each(levels, function(level) {
+            svg.append('path')
+                .datum(data)
+                .attr('class', 'drought ' + level)
+                .attr('d', area(level));
+        });
+
+    });
+
+    function translate(x, y) {
+        return "translate(" + x + "," + y + ")";
+    }
     </script>
 
 </body>

@@ -49,6 +49,7 @@ TODO:
 
  - download tabular data for national drought coverage
  - create area chart showing national drought coverage
+ - turn area chart into a reusable function that can be used for any span of drought data (including local, national)
  - write script (fab, make, etc) to download, convert data, render all maps
 
 
