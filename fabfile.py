@@ -18,12 +18,16 @@ env.exclude_requirements = [
     'git-remote-helpers',
 ]
 
+env.repos = {
+    'origin': ['master', 'master:gh-pages'],
+    'years': ['master', 'master:gh-pages']
+}
+
+
 def deploy():
-    """
-    Push to master and gh-pages.
-    """
-    local('git push origin master')
-    local('git push origin master:gh-pages')
+    for remote, branches in env.repos.items():
+        for branch in branches:
+            local('git push %s %s' % (remote, branch))
 
 
 def freeze():
