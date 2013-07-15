@@ -35,16 +35,20 @@ def freeze():
 def raster():
     """
     Create a raster image for each weekly drought snapshot.
+    This runs one year at a time to isolate errors.
     """
     for year in YEARS:
         local(_f('bin/raster.js --year %i' % year))
+
+    # update weeks.js
+    weeksjs()
 
 
 def reproject(infile):
     """
     Project a file to EPSG:4326.
     """
-    filename = os.path.basename(infile)
+    filename = os.path.basename(infile).lower()
     files = {
         'outfile': _f('data/shapefiles', filename),
         'infile' : infile

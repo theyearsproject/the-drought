@@ -58,8 +58,8 @@ function render(err, us, shapefiles) {
     us = JSON.parse(us);
 
     // queue up files to render
-    // two years at a time
-    var q = queue(52 * 2);
+    // one year at a time
+    var q = queue(52);
 
     shapefiles.forEach(function(filename) {
         q.defer(raster, us, filename);
