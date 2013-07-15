@@ -47,9 +47,9 @@ Also, Backbone could provide some useful eventing and routing. Permalinks would 
 TODO:
 -----
 
- - update fabfile (or Makefile) to download latest data from USDM and convert to a useable format
+ - download tabular data for national drought coverage
+ - create area chart showing national drought coverage
  - write script (fab, make, etc) to download, convert data, render all maps
- - build a slider that flips through map images, creating an animation
 
 
 
