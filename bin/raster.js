@@ -14,8 +14,8 @@ var DATA_DIR = path.resolve(__dirname, '..', 'data')
 
 var argv = require('optimist')
     .default({ 
-        height: 960, 
-        width: 600, 
+        width: 960, 
+        height: 600, 
         scale: .75, 
         year: null })
     .argv;

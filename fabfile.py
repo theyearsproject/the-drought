@@ -121,16 +121,16 @@ def weeks():
     Get a list of weeks represented in our shapefile directory.
     These will match names of shapefiles embedded in drought.json.
     """
-    shapefiles = glob.glob(_f('data/shapefiles', '*.shp'))
-    for shapefile in shapefiles:
-        name = os.path.basename(shapefile)
+    images = glob.glob(_f('img/drought', '*.png'))
+    for image in images:
+        name = os.path.basename(image)
         name, ext = os.path.splitext(name)
         yield name
 
 
 def weeksjs():
     """
-    Render a javascript file for weekly shapefile names.
+    Render a javascript file for weekly shapefile snapshots.
     """
     outfile = _f('js/weeks.js')
     js = "var WEEKS = %s;" % json.dumps(list(weeks()), indent=4)
