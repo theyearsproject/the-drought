@@ -18,6 +18,14 @@ env.exclude_requirements = [
     'git-remote-helpers',
 ]
 
+def deploy():
+    """
+    Push to master and gh-pages.
+    """
+    local('git push origin master')
+    local('git push origin master:gh-pages')
+
+
 def freeze():
     """
     pip freeze > requirements.txt, excluding virtualenv clutter
