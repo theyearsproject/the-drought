@@ -47,11 +47,13 @@ Also, Backbone could provide some useful eventing and routing. Permalinks would 
 TODO:
 -----
 
- - download tabular data for national drought coverage
- - create area chart showing national drought coverage
+ - add interactivity to area chart, including zooming and hover state
  - turn area chart into a reusable function that can be used for any span of drought data (including local, national)
- - write script (fab, make, etc) to download, convert data, render all maps
+ - combine chart and map on the same page
+ - programatically download tabular data for national drought coverage
 
+ - add SVG map overlay to allow selecting of states or counties
+ 
 
 
 

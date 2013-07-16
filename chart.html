@@ -19,6 +19,12 @@
         stroke-width: .5;
     }
 
+    rect.pane {
+      cursor: move;
+      fill: none;
+      pointer-events: all;
+    }
+
     </style>
 </head>
 <body>
@@ -81,18 +87,28 @@
         .tickFormat(function(d) { return d + '%'; });
 
     var area = function(accessor) {
-        var a = d3.svg.area()
+        return d3.svg.area()
             .x(function(d) { return x(d.Week); })
             .y0(height)
-            .y1(function(d) { return y(d[accessor]); });
-
-        return a;
+            .y1(function(d) { return y(d[accessor]); })
+            .interpolate('step-before');
     }
+
+    var zoom = d3.behavior.zoom()
+        .x(x)
+        .scaleExtent([1, 15])
+        .on('zoom', update);
 
     var svg = d3.select('#chart').append('svg')
         .style('height', height + margin.top + margin.bottom)
       .append('g')
         .attr('transform', translate(margin.left, margin.top));
+
+    svg.append('defs').append('clipPath')
+        .attr('id', 'clip')
+      .append('rect')
+        .attr('width', width)
+        .attr('height', height);
 
     svg.append('g')
         .attr('class', 'x axis')
@@ -102,6 +118,10 @@
     svg.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+    var paths = svg.append('g')
+        .attr('class', 'drought')
+        .attr('clip-path', 'url(#clip)');
 
     d3.csv(url).row(function(d) {
         // numerize
@@ -120,13 +140,36 @@
         window.data = data;
 
         _.each(levels, function(level) {
-            svg.append('path')
+            paths.append('path')
                 .datum(data)
                 .attr('class', 'drought ' + level)
                 .attr('d', area(level));
         });
 
+        // add a zoom pane overlay
+        svg.append('rect')
+            .attr('class', 'pane')
+            .attr('width', width)
+            .attr('height', height)
+            .call(zoom);
     });
+
+    function update() {
+        // freeze the domain so we can't slide off the scale
+
+        var domain = x.domain();
+        x.domain([
+            d3.max([dates[0], d3.min([domain[0], _.last(dates)])]),
+            d3.min([d3.max([_.last(dates), dates[0]]), domain[1]])
+        ]);
+
+        _.each(levels, function(level) {
+            paths.select('path.' + level).attr('d', area(level));
+        });
+
+        svg.select('g.x.axis').call(xAxis);
+        window._event = d3.event;
+    }
 
     function translate(x, y) {
         return "translate(" + x + "," + y + ")";
