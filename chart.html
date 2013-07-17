@@ -37,28 +37,29 @@
 <body>
 	<div class="container">
 		<div class="row">
-            <div class="caption">
+            <div class="caption national">
             </div>
 			<div id="chart" class="span12"></div>
 		</div>
 	</div>
 
     <script type="x-jst" id="caption-template">
-    <h4>Week: <%= Week %></h4>
+    <h4>Week: <%= formats.date(Week) %></h4>
     <ul>
-        <li>No drought: <%= Nothing %></li>
-        <li>Abnormally Dry: <%= D0 %></li>
-        <li>Moderate: <%= D1 %></li>
-        <li>Severe: <%= D2 %></li>
-        <li>Extreme: <%= D3 %></li>
-        <li>Exceptional: <%= D4 %></li>
+        <li>No drought: <%= formats.percent(Nothing) %></li>
+        <li>Abnormally Dry: <%= formats.percent(D0) %></li>
+        <li>Moderate: <%= formats.percent(D1) %></li>
+        <li>Severe: <%= formats.percent(D2) %></li>
+        <li>Extreme: <%= formats.percent(D3) %></li>
+        <li>Exceptional: <%= formats.percent(D4) %></li>
     </ul>
     </script>
     
     <script src="js/weeks.js"></script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/moment/moment.js"></script>
-    <script src="components/d3/d3.min.js"></script>
+    <script src="components/d3/d3.js"></script>
+    <script src="components/crossfilter/crossfilter.js"></script>
     <script type="text/javascript">
     var url = "data/csv/us.csv"
       , margin = {top: 25, right: 50, bottom: 25, left: 50}
@@ -69,7 +70,8 @@
     var formats = {
         file: d3.time.format('usdm%y%m%d'),
         date: d3.time.format('%b %d, %Y'),
-        week: d3.time.format('%Y-%m-%d')
+        week: d3.time.format('%Y-%m-%d'),
+        percent: function(d) { return d3.round(d, 2) + '%'; }
     };
 
     // scales and axes
@@ -77,7 +79,8 @@
         return formats.file.parse(d);
     });
 
-    var drought = {}
+    var drought = crossfilter()
+      , byDate = drought.dimension(function(d) { return d.Week; })
       , extent = [dates[0], dates[dates.length - 1]]
       , levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
 
@@ -139,20 +142,23 @@
         .attr('y1', 0)
         .attr('y2', height);
 
+    var template = d3.select('#caption-template').html()
+      , template = _.template(template);
+
     function showCaption() {
 
         var position = d3.mouse(this)
-          , week = x.invert(position[0]);
+          , week = x.invert(position[0])
+          , datum = byDate.filter(function(d) { return d < week; }).top(1)[0];
+
+        datum.formats = formats;
 
         verticle
             .attr('x1', position[0])
             .attr('x2', position[0])
             .style('stroke-width', 1);
 
-        var datum = drought[+week];
-        if (datum) {
-            console.log(datum);
-        }
+        d3.select('.caption.national').html(template(datum));
     }
 
     function hideCaption() {
@@ -196,9 +202,9 @@
         d['D3-D4'] = +d['D3-D4'];
         d['D4'] = +d['D4'];
 
-        d['D0'] = d['D0-D4'] - d['D1-D4'] - d['D2-D4'] - d['D3-D4'] - d['D4'];
-        d['D1'] = d['D1-D4'] - d['D2-D4'] - d['D3-D4'] - d['D4'];
-        d['D2'] = d['D2-D4'] - d['D3-D4'] - d['D4'];
+        d['D0'] = d['D0-D4'] - d['D1-D4'];
+        d['D1'] = d['D1-D4'] - d['D2-D4'];
+        d['D2'] = d['D2-D4'] - d['D3-D4'];
         d['D3'] = d['D3-D4'] - d['D4'];
 
         return d;
@@ -206,7 +212,7 @@
     }).get(function(err, data) {
         // render the chart
         window.data = data;
-        drought = _.object(_.map(data, function(d) { return [+d.Week, d]; }));
+        drought.add(data);
 
         _.each(levels, function(level) {
             paths.append('path')
