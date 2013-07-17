@@ -25,16 +25,35 @@
       pointer-events: all;
     }
 
+    .verticle {
+        fill: none;
+        stroke: #444;
+        stroke-width: 0;
+        shape-rendering: crispEdges;
+    }
+
     </style>
 </head>
 <body>
 	<div class="container">
 		<div class="row">
-			<div id="chart" class="span12">
-			</div>
+            <div class="caption">
+            </div>
+			<div id="chart" class="span12"></div>
 		</div>
-		
 	</div>
+
+    <script type="x-jst" id="caption-template">
+    <h4>Week: <%= Week %></h4>
+    <ul>
+        <li>No drought: <%= Nothing %></li>
+        <li>Abnormally Dry: <%= D0 %></li>
+        <li>Moderate: <%= D1 %></li>
+        <li>Severe: <%= D2 %></li>
+        <li>Extreme: <%= D3 %></li>
+        <li>Exceptional: <%= D4 %></li>
+    </ul>
+    </script>
     
     <script src="js/weeks.js"></script>
     <script src="components/underscore/underscore.js"></script>
@@ -58,17 +77,9 @@
         return formats.file.parse(d);
     });
 
-    var extent = [dates[0], dates[dates.length - 1]];
-
-    var drought = {
-        'DM-0': [],
-        'DM-1': [],
-        'DM-2': [],
-        'DM-3': [],
-        'DM-4': []
-    };
-
-    var levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
+    var drought = {}
+      , extent = [dates[0], dates[dates.length - 1]]
+      , levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
 
     var x = d3.time.scale()
         .domain(extent)
@@ -93,8 +104,7 @@
         return d3.svg.area()
             .x(function(d) { return x(d.Week); })
             .y0(height)
-            .y1(function(d) { return y(d[accessor]); })
-            .interpolate('basis');
+            .y1(function(d) { return y(d[accessor]); });
     }
 
     var zoom = d3.behavior.zoom()
@@ -124,39 +134,32 @@
         .attr('class', 'drought')
         .attr('clip-path', 'url(#clip)');
 
-    d3.csv(url).row(function(d) {
-        // numerize
-        // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
-        d.Week = formats.week.parse(d.Week);
-        d.Nothing = +d.Nothing;
-        d['D0-D4'] = +d['D0-D4'];
-        d['D1-D4'] = +d['D1-D4'];
-        d['D2-D4'] = +d['D3-D4'];
-        d['D4'] = +d['D4'];
+    var verticle = svg.append('line')
+        .attr('class', 'verticle')
+        .attr('y1', 0)
+        .attr('y2', height);
 
-        return d;
+    function showCaption() {
 
-    }).get(function(err, data) {
-        // render the chart
-        window.data = data;
+        var position = d3.mouse(this)
+          , week = x.invert(position[0]);
 
-        _.each(levels, function(level) {
-            paths.append('path')
-                .datum(data)
-                .attr('class', 'drought ' + level)
-                .attr('d', area(level));
-        });
+        verticle
+            .attr('x1', position[0])
+            .attr('x2', position[0])
+            .style('stroke-width', 1);
 
-        // add a zoom pane overlay
-        svg.append('rect')
-            .attr('class', 'pane')
-            .attr('width', width)
-            .attr('height', height)
-            .call(zoom);
+        var datum = drought[+week];
+        if (datum) {
+            console.log(datum);
+        }
+    }
 
-        svg.select('g.x.axis').call(xAxis);
-        svg.select('g.y.axis').call(yAxis);
-    });
+    function hideCaption() {
+
+        verticle
+            .style('stroke-width', 0);
+    }
 
     function update() {
         // freeze the domain so we can't slide off the scale
@@ -180,6 +183,52 @@
     function translate(x, y) {
         return "translate(" + x + "," + y + ")";
     }
+
+    // load it up
+    d3.csv(url).row(function(d) {
+        // numerize
+        // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
+        d.Week = formats.week.parse(d.Week);
+        d.Nothing = +d.Nothing;
+        d['D0-D4'] = +d['D0-D4'];
+        d['D1-D4'] = +d['D1-D4'];
+        d['D2-D4'] = +d['D2-D4'];
+        d['D3-D4'] = +d['D3-D4'];
+        d['D4'] = +d['D4'];
+
+        d['D0'] = d['D0-D4'] - d['D1-D4'] - d['D2-D4'] - d['D3-D4'] - d['D4'];
+        d['D1'] = d['D1-D4'] - d['D2-D4'] - d['D3-D4'] - d['D4'];
+        d['D2'] = d['D2-D4'] - d['D3-D4'] - d['D4'];
+        d['D3'] = d['D3-D4'] - d['D4'];
+
+        return d;
+
+    }).get(function(err, data) {
+        // render the chart
+        window.data = data;
+        drought = _.object(_.map(data, function(d) { return [+d.Week, d]; }));
+
+        _.each(levels, function(level) {
+            paths.append('path')
+                .datum(data)
+                .attr('class', 'drought ' + level)
+                .attr('d', area(level));
+        });
+
+        // add a zoom pane overlay
+        svg.append('rect')
+            .attr('class', 'pane')
+            .attr('width', width)
+            .attr('height', height)
+            .call(zoom)
+            .on('mousemove', showCaption)
+            .on('mouseout', hideCaption);
+
+        svg.select('g.x.axis').call(xAxis);
+        svg.select('g.y.axis').call(yAxis);
+    });
+
+
     </script>
 
 </body>
