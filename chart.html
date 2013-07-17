@@ -124,14 +124,15 @@
           , week = x.invert(position[0])
           , datum = byDate.filter(function(d) { return d < week; }).top(1)[0];
 
-        datum.formats = formats;
-
         verticle
             .attr('x1', position[0])
             .attr('x2', position[0])
             .style('stroke-width', 1);
 
-        d3.select('.caption.national').html(template(datum));
+        if (datum) {
+            datum.formats = formats;
+            d3.select('.caption.national').html(template(datum));
+        }
     }
 
     function hideCaption() {
