@@ -6,52 +6,25 @@
     <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap-responsive.css">
     <link rel="stylesheet" type="text/css" href="css/drought.css">
-    <style type="text/css">
-    svg {
-        font-family: sans-serif;
-        font-size: 10px;
-    }
 
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #444;
-        stroke-width: .5;
-    }
-
-    rect.pane {
-      cursor: move;
-      fill: none;
-      pointer-events: all;
-    }
-
-    .verticle {
-        fill: none;
-        stroke: #444;
-        stroke-width: 0;
-        shape-rendering: crispEdges;
-    }
-
-    </style>
 </head>
 <body>
 	<div class="container">
 		<div class="row">
-            <div class="caption national">
-            </div>
+            <div class="caption national span12"></div>
 			<div id="chart" class="span12"></div>
 		</div>
 	</div>
 
     <script type="x-jst" id="caption-template">
     <h4>Week: <%= formats.date(Week) %></h4>
-    <ul>
+    <ul class="inline drought-levels">
         <li>No drought: <%= formats.percent(Nothing) %></li>
-        <li>Abnormally Dry: <%= formats.percent(D0) %></li>
-        <li>Moderate: <%= formats.percent(D1) %></li>
-        <li>Severe: <%= formats.percent(D2) %></li>
-        <li>Extreme: <%= formats.percent(D3) %></li>
-        <li>Exceptional: <%= formats.percent(D4) %></li>
+        <li><span class="D0"></span>Abnormally Dry: <%= formats.percent(D0) %></li>
+        <li><span class="D1"></span>Moderate: <%= formats.percent(D1) %></li>
+        <li><span class="D2"></span>Severe: <%= formats.percent(D2) %></li>
+        <li><span class="D3"></span>Extreme: <%= formats.percent(D3) %></li>
+        <li><span class="D4"></span>Exceptional: <%= formats.percent(D4) %></li>
     </ul>
     </script>
     
@@ -71,7 +44,7 @@
         file: d3.time.format('usdm%y%m%d'),
         date: d3.time.format('%b %d, %Y'),
         week: d3.time.format('%Y-%m-%d'),
-        percent: function(d) { return d3.round(d, 2) + '%'; }
+        percent: function(d) { return d3.round(d) + '%'; }
     };
 
     // scales and axes
