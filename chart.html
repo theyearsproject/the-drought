@@ -43,7 +43,7 @@
     <script type="text/javascript">
     var url = "data/csv/us.csv"
       , margin = {top: 25, right: 50, bottom: 25, left: 50}
-      , height = 400 - margin.top - margin.bottom
+      , height = 300 - margin.top - margin.bottom
       , width = parseInt(d3.select('#chart').style('width'))
       , width = width - margin.left - margin.right;
 
@@ -58,6 +58,8 @@
         return formats.file.parse(d);
     });
 
+    var extent = [dates[0], dates[dates.length - 1]];
+
     var drought = {
         'DM-0': [],
         'DM-1': [],
@@ -69,7 +71,7 @@
     var levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
 
     var x = d3.time.scale()
-        .domain(d3.extent(dates))
+        .domain(extent)
         .range([0, width]);
 
     var y = d3.scale.linear()
@@ -79,6 +81,7 @@
     var xAxis = d3.svg.axis()
         .orient('bottom')
         .scale(x)
+        .ticks(8)
         .tickFormat(formats.date);
 
     var yAxis = d3.svg.axis()
@@ -91,7 +94,7 @@
             .x(function(d) { return x(d.Week); })
             .y0(height)
             .y1(function(d) { return y(d[accessor]); })
-            .interpolate('step-before');
+            .interpolate('basis');
     }
 
     var zoom = d3.behavior.zoom()
@@ -112,12 +115,10 @@
 
     svg.append('g')
         .attr('class', 'x axis')
-        .attr('transform', translate(0, height))
-        .call(xAxis);
+        .attr('transform', translate(0, height));
 
     svg.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis);
+        .attr('class', 'y axis');
 
     var paths = svg.append('g')
         .attr('class', 'drought')
@@ -152,15 +153,20 @@
             .attr('width', width)
             .attr('height', height)
             .call(zoom);
+
+        svg.select('g.x.axis').call(xAxis);
+        svg.select('g.y.axis').call(yAxis);
     });
 
     function update() {
         // freeze the domain so we can't slide off the scale
-
         var domain = x.domain();
         x.domain([
-            d3.max([dates[0], d3.min([domain[0], _.last(dates)])]),
-            d3.min([d3.max([_.last(dates), dates[0]]), domain[1]])
+            // the first date, or the last year
+            d3.max([dates[0], d3.min([domain[0], dates[dates.length - 52]])]),
+            
+            // don't go earler than the first date or later than the last
+            d3.min( [ d3.max([domain[1], dates[51]]), extent[1]] )
         ]);
 
         _.each(levels, function(level) {
