@@ -165,6 +165,7 @@ d3.csv(url).row(function(d) {
         .attr('height', height)
         .call(zoom)
         .on('mousemove', showCaption)
+        .on('touchstart', showCaption)
         .on('mouseout', hideCaption);
 
     svg.select('g.x.axis').call(xAxis);
