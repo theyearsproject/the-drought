@@ -1,6 +1,7 @@
 var url = "data/csv/us.csv"
-  , margin = {top: 25, right: 50, bottom: 25, left: 50}
-  , height = 300 - margin.top - margin.bottom
+  , margin = {top: 25, right: 25, bottom: 25, left: 50}
+  , height = parseInt(d3.select('#chart').style('height'))
+  , height = height - margin.top - margin.bottom
   , width = parseInt(d3.select('#chart').style('width'))
   , width = width - margin.left - margin.right;
 
@@ -32,7 +33,7 @@ var y = d3.scale.linear()
 var xAxis = d3.svg.axis()
     .orient('bottom')
     .scale(x)
-    .ticks(8)
+    .ticks(3)
     .tickFormat(formats.date);
 
 var yAxis = d3.svg.axis()

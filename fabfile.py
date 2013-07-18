@@ -7,8 +7,9 @@ import urllib
 from fabric.api import *
 
 DATE_FORMAT = "usdm%y%m%d"
+DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
+
 ROOT = os.path.realpath(os.path.dirname(__file__))
-URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
 YEARS = range(2000, 2014)
 
 _f = lambda *fn: os.path.join(ROOT, *fn)
@@ -103,7 +104,7 @@ def update_shapefiles(year=2013):
     Download, unzip and reproject all shapefiles from US Drought Monitor
     """
     year = str(year)
-    url = URL % {'year': year}
+    url = DROUGHT_URL % {'year': year}
 
     # ensure directories exist
     local('mkdir -p %s' % _f('data/raw'))

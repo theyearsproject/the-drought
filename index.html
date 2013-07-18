@@ -9,22 +9,33 @@
     <link rel="stylesheet" type="text/css" href="components/jquery-ui/themes/ui-lightness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/drought.css">
 
+    <style type="text/css">
+    #chart {
+    	height: 200px;
+    	width: 100%;
+    }
+    </style>
 </head>
 <body>
 	<div class="container">
+
 		<div class="row">
 			<div id="map" class="span12">
 			    <img src="img/drought/usdm130702.png">
 			</div>
 		</div>
-		<div class="row">
-			<div id="slider" class="span12"></div>
-		</div>
 
 		<div class="row">
 			<div id="chart" class="span12"></div>
-            <div class="caption national span12"></div>
 		</div>
+
+		<div class="row">
+			<div id="slider" class="span12"></div>
+		</div>
+		<div class="row">
+			<div class="caption national span12"></div>
+		</div>
+
 	</div>
     
     <script type="x-jst" id="caption-template">
