@@ -52,12 +52,14 @@ One way I could handle local data is to put it on a separate page altogether, es
 TODO:
 -----
 
- - combine chart and map on the same page
+ - start chart zoomed in, showing only a two-year range
+ - combine chart and map on the same page in a mobile-friendly way
+ 
  - load map images based on visible area on chart (time range) using crossfilter and a data join (attach images to a hidden div, maybe)
+ 
  - figure out how to programatically move the chart (pan and zoom). Example: http://bl.ocks.org/mbostock/3892928
+ 
  - turn area chart into a reusable function that can be used for any span of drought data (including local, national)
- - programatically download tabular data for national drought coverage
- - programatically download tabular data for county-level drought coverage
 
  - add SVG map overlay to allow selecting of states or counties
  

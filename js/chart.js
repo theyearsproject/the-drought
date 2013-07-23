@@ -95,8 +95,14 @@ function showCaption() {
         .style('stroke-width', 1);
 
     if (datum) {
+        // update the caption
         datum.formats = formats;
         d3.select('.caption.national').html(template(datum));
+
+        // update the map
+        var map = d3.select('#map');
+        map.select('img').remove();
+        map.node().appendChild(datum.image);
     }
 }
 
@@ -134,16 +140,19 @@ d3.csv(url).row(function(d) {
     // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
     d.Week = formats.week.parse(d.Week);
     d.Nothing = +d.Nothing;
-    d['D0-D4'] = +d['D0-D4'];
-    d['D1-D4'] = +d['D1-D4'];
-    d['D2-D4'] = +d['D2-D4'];
-    d['D3-D4'] = +d['D3-D4'];
+    d['D0-D4'] = +d['D0'];
+    d['D1-D4'] = +d['D1'];
+    d['D2-D4'] = +d['D2'];
+    d['D3-D4'] = +d['D3'];
     d['D4'] = +d['D4'];
 
     d['D0'] = d['D0-D4'] - d['D1-D4'];
     d['D1'] = d['D1-D4'] - d['D2-D4'];
     d['D2'] = d['D2-D4'] - d['D3-D4'];
     d['D3'] = d['D3-D4'] - d['D4'];
+
+    d.image = document.createElement('img');
+    d.image.src = IMG_PATH + formats.file(d.Week) + '.png';
 
     return d;
 
