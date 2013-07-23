@@ -1,6 +1,7 @@
 .DS_Store
 *.pyc
 .~*
+*.db
 
 # img/drought/*.png
 data/raw

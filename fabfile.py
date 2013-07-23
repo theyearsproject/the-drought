@@ -1,3 +1,4 @@
+import csv
 import datetime
 import glob
 import json
@@ -5,12 +6,14 @@ import os
 import urllib
 
 from fabric.api import *
+from lxml import etree
 
 DATE_FORMAT = "usdm%y%m%d"
+SHORT_DATE_FORMAT = "%y%m%d"
+
 DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
 
 ROOT = os.path.realpath(os.path.dirname(__file__))
-YEARS = range(2000, 2014)
 
 _f = lambda *fn: os.path.join(ROOT, *fn)
 
@@ -23,6 +26,15 @@ env.repos = {
     'origin': ['master', 'master:gh-pages'],
     'years': ['master', 'master:gh-pages']
 }
+
+env.states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", 
+              "DE", "DC", "FL", "GA", "HI", "ID", "IL", 
+              "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+              "MA", "MI", "MN", "MS", "MO", "MT", "NE", 
+              "NV", "NH", "NJ", "NM", "NY", "NC", "ND", 
+              "OH", "OK", "OR", "PA", "PR", "RI", "SC", 
+              "SD", "TN", "TX", "UT", "VT", "VA", "WA", 
+              "WV", "WI", "WY"]
 
 
 def deploy():
@@ -45,12 +57,66 @@ def freeze():
     print reqs
 
 
-def raster():
+def load_all():
+    """
+    Load all US and state-level data.
+    """
+    load_data('US')
+    
+    for state in env.states:
+        load_data(state)
+
+
+def load_data(locale='US'):
+    """
+    Grab drought coverage data as XML and convert to CSV.
+
+    <week name="total" date="130716">
+        <Nothing>46.45</Nothing>
+        <D0>53.55</D0>
+        <D1>41.02</D1>
+        <D2>28.66</D2>
+        <D3>11.15</D3>
+        <D4>3.63</D4>
+    </week>
+
+    """
+    if locale == "US":
+        url = "http://droughtmonitor.unl.edu/tabular/total_archive.xml"
+
+    else:
+        locale = locale.upper()
+        url = "http://droughtmonitor.unl.edu/tabular/%s.xml" % locale
+
+    # grab xml from the drought monitor
+    root = etree.parse(url).getroot()
+
+    # get an outfile
+    filename = _f('data/csv', '%s.csv' % locale.lower())
+    fields = ('Week', 'Nothing', 'D0', 'D1', 'D2', 'D3', 'D4')
+
+    with open(filename, 'wb') as f:
+        writer = csv.DictWriter(f, fields)
+        writer.writeheader()
+
+        # and load!
+        for week in root.findall('week'):
+
+            # extract a row
+            row = dict((e.tag, e.text) for e in week if e.tag in fields)
+            row['Week'] = datetime.datetime.strptime(week.get('date'), SHORT_DATE_FORMAT).date()
+
+            writer.writerow(row)
+
+    print "Wrote file: %s" % filename
+
+
+def raster(start=2000, end=2013):
     """
     Create a raster image for each weekly drought snapshot.
     This runs one year at a time to isolate errors.
     """
-    for year in YEARS:
+    for year in xrange(start, end + 1):
         local(_f('bin/raster.js --year %i' % year))
 
     # update weeks.js
@@ -99,6 +165,17 @@ def topojson():
     local('topojson --id-property DM -o %s -- %s' % (_f('data/drought.json'), shapefiles))
 
 
+def update_all_shapefiles(start=2000, end=2013):
+    """
+    Run update_shapefiles for years between start and end.
+    """
+    start = int(start)
+    end = int(end)
+
+    for year in range(start, end + 1):
+        update_shapefiles(year)
+
+
 def update_shapefiles(year=2013):
     """
     Download, unzip and reproject all shapefiles from US Drought Monitor
@@ -120,17 +197,6 @@ def update_shapefiles(year=2013):
     local('unzip -u -d %s %s' % (dest, zipfile))
 
     reproject_year(year)
-
-
-def update(start=2000, end=2013):
-    """
-    Run update_shapefiles for years between start and end.
-    """
-    start = int(start)
-    end = int(end)
-
-    for year in range(start, end + 1):
-        update_shapefiles(year)
 
 
 def weeks():
