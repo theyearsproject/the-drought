@@ -22,6 +22,7 @@
 
 		<div class="row">
 			<div id="map" class="span8">
+                <svg class="overlay"></svg>
 			    <img src="img/drought/usdm130702.png">
 			</div>
             <div class="caption national span4"></div>
@@ -53,33 +54,29 @@
     <script src="components/underscore/underscore.js"></script>
     <script src="components/d3/d3.js" charset="utf-8"></script>
     <script src="components/crossfilter/crossfilter.js"></script>
+    <script src="components/topojson/topojson.js"></script>
     <script src="js/chart.js"></script>
 
     <script type="text/javascript">
     var IMG_PATH = "img/drought/";
 
-    /***
-    var weeks = _.map(WEEKS, function(w, i) {
-    	var img = document.createElement('img');
-    	img.setAttribute('src', IMG_PATH + w + '.png');
-    	return img;
+    d3.json('data/us.json', function(err, us) {
+
+        window.us = us;
+
+        var svg = d3.select('svg.overlay')
+          , projection = d3.geo.albersUsa()
+          , path = d3.geo.path().projection(projection);
+
+        var states = topojson.feature(us, us.objects.states);
+
+        svg.selectAll('path.state')
+            .data(states.features)
+          .enter().append('path')
+            .attr('class', 'state')
+            .attr('d', path);
+
     });
-
-    var map = $('#map');
-
-    var slider = $('#slider').slider({
-    	// settings
-    	//max: WEEKS.length,
-        max: 52,
-
-    	// events
-    	slide: function(event, ui) {
-    		//var image = weeks[ui.value];
-    		//map.html(image);
-    	}
-    });
-    ***/
-
     </script>
 
 </body>

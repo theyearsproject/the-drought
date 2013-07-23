@@ -50,6 +50,16 @@ rect.pane {
 	margin-top: .15em;
 }
 
+#map { height: 450px; }
+
+#map img,
+#map svg {
+    position: absolute;
+    display: inline;
+    height: 450px;
+    max-width: 720px;
+}
+
 .states {
     fill: none;
     stroke: #ddd;
