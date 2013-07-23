@@ -37,6 +37,11 @@ rect.pane {
 .DM-3, .D3, .D3-D4 { background-color: rgb(230, 0, 0); }
 .DM-4, .D4 { background-color: rgb(115, 0, 0); }
 
+.Nothing { 
+    background-color: rgb(255, 255, 255); 
+    border: 1px solid #ddd; 
+}
+
 .drought-levels span { 
 	height: 1em; 
 	width: 1em; 
