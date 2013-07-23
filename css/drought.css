@@ -57,14 +57,19 @@ rect.pane {
     position: absolute;
     display: inline;
     height: 450px;
-    max-width: 720px;
 }
 
-.states {
+#map svg { z-index: 10; }
+
+.states,
+.state {
     fill: none;
     stroke: #ddd;
     stroke-width: 1;
+    pointer-events: all;
 }
+
+.state:hover { stroke: #333; stroke-width: 1.5; }
 
 .land {
     fill: #eee;

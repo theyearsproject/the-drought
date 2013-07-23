@@ -64,9 +64,18 @@
 
         window.us = us;
 
-        var svg = d3.select('svg.overlay')
-          , projection = d3.geo.albersUsa()
-          , path = d3.geo.path().projection(projection);
+        var height = 600
+          , width = 960;
+
+        var svg = d3.select('svg.overlay').append('g')
+            .attr('class', 'layers')
+            .attr('transform', 'translate(0,0)');
+        
+        var projection = d3.geo.albersUsa()
+            .scale(1280 * .75)
+            .translate([width / 2 - 120, height / 2 - 75]);
+        
+        var path = d3.geo.path().projection(projection);
 
         var states = topojson.feature(us, us.objects.states);
 
