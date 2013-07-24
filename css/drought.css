@@ -64,12 +64,10 @@ rect.pane {
 .states,
 .state {
     fill: none;
-    stroke: #ddd;
-    stroke-width: 1;
     pointer-events: all;
 }
 
-.state:hover { stroke: #333; stroke-width: 1.5; }
+.state:hover { stroke: #333; stroke-width: 1; }
 
 .land {
     fill: #eee;
