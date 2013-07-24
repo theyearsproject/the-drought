@@ -116,7 +116,7 @@ def raster(start=2000, end=2013):
     Create a raster image for each weekly drought snapshot.
     This runs one year at a time to isolate errors.
     """
-    for year in xrange(start, end + 1):
+    for year in xrange(int(start), int(end) + 1):
         local(_f('bin/raster.js --year %i' % year))
 
     # update weeks.js
