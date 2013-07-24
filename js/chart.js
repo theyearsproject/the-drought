@@ -33,7 +33,7 @@ var y = d3.scale.linear()
 var xAxis = d3.svg.axis()
     .orient('bottom')
     .scale(x)
-    .ticks(3)
+    .ticks(7)
     .tickFormat(formats.date);
 
 var yAxis = d3.svg.axis()

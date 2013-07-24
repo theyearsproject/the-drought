@@ -56,7 +56,7 @@ rect.pane {
 #map svg {
     position: absolute;
     display: inline;
-    height: 450px;
+    max-height: 450px;
 }
 
 #map svg { z-index: 10; }
