@@ -11,7 +11,7 @@ svg {
 }
 
 rect.pane {
-  cursor: move;
+  cursor: inherit;
   fill: none;
   pointer-events: all;
 }
@@ -71,10 +71,14 @@ rect.pane {
 #map svg { 
     z-index: 10; 
     position: absolute;
+    max-height: 450px;
+    max-width: 720px;
 }
 
 #chart {
     clear: both;
+    height: 200px;
+    width: 100%;
 }
 
 /* responsive bits */

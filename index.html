@@ -10,14 +10,6 @@
     <link rel="stylesheet" type="text/css" href="components/jquery-ui/themes/ui-lightness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/drought.css">
 
-    <style type="text/css">
-    #chart {
-    	height: 200px;
-    	width: 100%;
-    }
-
-    #map img { border: 1px solid black; }
-    </style>
 </head>
 <body>
 	<div class="container">
@@ -59,19 +51,23 @@
     var IMG_PATH = "img/drought/";
 
     d3.json('data/us.json', function(err, us) {
-        return;
+
         window.us = us;
 
-        var height = 600
-          , width = 960;
+        var height = parseInt(d3.select('#map img').style('height'))
+          , width = parseInt(d3.select('#map img').style('width'));
 
-        var svg = d3.select('svg.overlay').append('g')
+        var svg = d3.select('svg.overlay')
+            .style('width', width + 'px')
+            .style('height', height + 'px')
+          .append('g')
             .attr('class', 'layers')
             .attr('transform', 'translate(0,0)');
         
         var projection = d3.geo.albersUsa()
-            .scale(1280)
-            .translate([width / 2 - 120, height / 2 - 75]);
+            .scale(963)
+            .translate([width / 2, height / 2])
+            .precision(0);
         
         var path = d3.geo.path().projection(projection);
 
