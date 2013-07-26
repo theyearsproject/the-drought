@@ -50,27 +50,48 @@ rect.pane {
 	margin-top: .15em;
 }
 
-#map { height: 450px; }
+.row { position: relative; }
 
-#map img,
-#map svg {
-    position: absolute;
-    display: inline;
-    max-height: 450px;
-}
-
-#map svg { z-index: 10; }
-
-.states,
 .state {
     fill: none;
     pointer-events: all;
 }
 
-.state:hover { stroke: #333; stroke-width: 1; }
+.state:hover { 
+    stroke: #333; 
+    stroke-width: 1; 
+}
 
-.land {
-    fill: #eee;
+#map img {
+    position: relative;
+    display: inline;
+    max-height: 450px;
+}
+
+#map svg { 
+    z-index: 10; 
+    position: absolute;
+}
+
+#chart {
+    clear: both;
+}
+
+/* responsive bits */
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    .caption {
+        display: none;
+    }
+
+    .overlay {
+        width: 360px;
+        height: 227px;
+    }
+
+    #map img {
+        min-height: 200px;
+    }
 }
 
 

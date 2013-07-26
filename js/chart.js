@@ -172,7 +172,7 @@ d3.csv(url).row(function(d) {
         .attr('class', 'pane')
         .attr('width', width)
         .attr('height', height)
-        .call(zoom)
+        //.call(zoom)
         .on('mousemove', showCaption)
         .on('touchstart', showCaption)
         .on('mouseout', hideCaption);

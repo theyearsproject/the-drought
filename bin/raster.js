@@ -16,7 +16,7 @@ var argv = require('optimist')
     .default({ 
         width: 960, 
         height: 600, 
-        scale: .75, 
+        scale: 1, 
         year: null })
     .argv;
 
