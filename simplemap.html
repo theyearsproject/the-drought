@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>The Drought</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="components/bootstrap/css/bootstrap-responsive.css">
+
+    <link rel="stylesheet" type="text/css" href="css/drought.css">
+    
+    <style type="text/css">
+    #frames {
+    	height: 30px;
+    }
+
+    .frame {
+    	background-color: Steelblue;
+    	height: 30px;
+    	display: inline;
+    	float: left;
+    	opacity: .5;
+    }
+
+    .frame:hover {
+    	opacity: 1;
+    }
+    </style>
+
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="span12" id="frames"></div>
+			<div class="span12" id="map"></div>
+		</div>
+	</div>
+
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/d3/d3.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+    // paths
+    var IMG_PATH = "img/drought/"
+      , CSV_PATH = "data/csv/";
+
+    var formats = {
+        file: d3.time.format('usdm%y%m%d'),
+        date: d3.time.format('%b %d, %Y'),
+        week: d3.time.format('%Y-%m-%d'),
+        percent: function(d) { return d3.round(d) + '%'; }
+    };
+
+    var margins = {
+    	frames: {top: 0, right: 0, bottom: 0, left: 0},
+    	map: {top: 0, right: 0, bottom: 0, left: 0}
+    };
+
+    var width = parseInt(d3.select('#frames').style('width')) - margins.frames.left - margins.frames.right;
+
+    // scales
+    var x = d3.scale.linear()
+        .range([0, width]);
+
+    var frames = d3.select('#frames').selectAll('.frame');
+
+    fetch('us', function(err, data) {
+    	window.data = data;
+
+    	var frameWidth = width / data.length;
+
+    	x.domain([0, data.length]);
+
+    	// data join
+    	frames.data(data)
+			.enter()
+			.append('div')
+			.attr('class', 'frame')
+			.style('width', frameWidth + 'px');
+
+    });
+
+    function fetch(locale, cb) {
+    	var url = CSV_PATH + locale.toLowerCase() + ".csv";
+
+    	d3.csv(url).row(function(d) {
+    	    // numerize
+    	    // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
+    	    d.Week = new Date(Date.parse(d.Week));
+    	    d.Nothing = +d.Nothing;
+    	    d['D0-D4'] = +d['D0'];
+    	    d['D1-D4'] = +d['D1'];
+    	    d['D2-D4'] = +d['D2'];
+    	    d['D3-D4'] = +d['D3'];
+    	    d['D4'] = +d['D4'];
+
+    	    d['D0'] = d['D0-D4'] - d['D1-D4'];
+    	    d['D1'] = d['D1-D4'] - d['D2-D4'];
+    	    d['D2'] = d['D2-D4'] - d['D3-D4'];
+    	    d['D3'] = d['D3-D4'] - d['D4'];
+
+    	    /***
+    	    d.image = document.createElement('img');
+    	    d.image.src = IMG_PATH + formats.file(d.Week) + '.png';
+			***/
+    	    return d;
+
+    	}).get(cb);
+    }
+
+    function resize(selection) {
+    	// call this when something needs to be sized according to a master element
+
+    }
+
+    </script>
+
+</body>
+</html>
