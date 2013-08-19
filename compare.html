@@ -31,7 +31,10 @@
 <body>
     <header class="navbar navbar-default navbar-fixed-top">
         <div class="row">
-            <h1 class="col-lg-6 col-md-6">The Drought</h1>
+            <div class="col-lg-12">
+                <h1>The Drought</h1>
+                <p>Move the slider to compare drought conditions week by week over the past 14 years.</p>
+            </div>
         </div>
         <div class="row">
             <div class="col-lg-12 col-md-12">
@@ -51,11 +54,16 @@
     <script src="components/jquery-ui/ui/jquery-ui.js"></script>
 
     <script type="text/javascript">
-    var IMG_PATH = "/img/drought/"
-      , format = d3.time.format('usdm%y%m%d');
+    var IMG_PATH = "/img/drought/";
+    
+    var formats = {
+        file: d3.time.format('usdm%y%m%d'),
+        date: d3.time.format('%b %d, %Y'),
+        week: d3.time.format('%Y-%m-%d'),
+    };
 
     var nest = d3.nest().key(function(d) {
-        return format.parse(d).getFullYear();
+        return formats.file.parse(d).getFullYear();
     }).sortKeys(d3.descending);
 
     var years = d3.select('#maps').selectAll('.year')
@@ -77,7 +85,7 @@
     
     weeks.append('h2')
         .text(function(d) {
-            return format.parse(d).toDateString();
+            return formats.date(formats.file.parse(d));
         });
 
     var slider = $('#slider').slider({
