@@ -29,14 +29,16 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <header class="navbar navbar-default navbar-fixed-top">
         <div class="row">
-            <div class="col-lg-12">
-                <h1>The Drought</h1>
+            <h1 class="col-lg-6 col-md-6">The Drought</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
                 <div id="slider"></div>
             </div>
         </div>
-    </nav>
+    </header>
 
     <div class="container">
         <div id="maps" class="row"></div>
@@ -60,7 +62,7 @@
         .data(nest.entries(WEEKS));
     
     years.enter().append('div')
-        .attr('class', 'year col-lg-12')
+        .attr('class', 'year col-lg-4 col-md-6 col-sm-6 col-xs-12')
         .attr('id', function(d) { return 'year-' + d.key; });
 
     var weeks = years.selectAll('.week')
@@ -80,11 +82,27 @@
 
     var slider = $('#slider').slider({
         max: 51,
+
+        change: function(e, ui) {
+            update(e, ui);
+        },
+
         slide: function(e, ui) {
-            weeks.classed('active', function(d, i) { return ui.value === i; });
+            $('.week-num').text(ui.value + 1);
+            update(e, ui);
         }
 
     });
+
+    function update(e, ui) {
+        weeks.classed('active', function(d, i) { return ui.value === i; });
+    }
+
+    // bits of setup
+    slider.slider({ value: weeks[0].length - 1 });
+    $(window).on('resize', function(e) {
+        $('body').css('padding-top', $('header').height());        
+    }).resize();
 
     </script>
 
