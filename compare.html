@@ -12,16 +12,23 @@
 
 </head>
 <body>
-	<div class="container">
-	</div>
+    <div class="container">
+    </div>
 
-	<script src="js/weeks.js"></script>
-	<script src="components/underscore/underscore.js"></script>
-	<script src="components/d3/d3.min.js" charset="utf-8"></script>
-	<script src="components/jquery/jquery.min.js"></script>
-	<script src="components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="js/weeks.js"></script>
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/d3/d3.min.js" charset="utf-8"></script>
+    <script src="components/jquery/jquery.min.js"></script>
+    <script src="components/jquery-ui/ui/jquery-ui.js"></script>
 
-	<script type="text/javascript"></script>
+    <script type="text/javascript">
+    var IMG_PATH = "/img/drought/"
+      , format = d3.time.format('usdm%y%m%d');
+
+    var nest = d3.nest().key(function(d) {
+        return format.parse(d).getFullYear();
+    });
+    </script>
 
 </body>
 </html>
