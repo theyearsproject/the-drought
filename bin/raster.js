@@ -14,15 +14,15 @@ var DATA_DIR = path.resolve(__dirname, '..', 'data')
 
 var argv = require('optimist')
     .default({ 
-        width: 960, 
-        height: 600, 
-        scale: 1, 
+        width: 750, 
+        height: 469, 
+        scale: 1.3, 
         year: null })
     .argv;
 
 var scale = argv.scale
-  , width = argv.width * scale
-  , height = argv.height * scale
+  , width = argv.width
+  , height = argv.height
   , year = argv.year;
 
 var colors = {
@@ -37,7 +37,7 @@ var colors = {
 };
 
 var projection = d3.geo.albersUsa()
-    .scale(1280 * scale)
+    .scale(width * scale)
     .translate([width / 2, height / 2])
     .precision(0);
 
@@ -117,7 +117,7 @@ function raster(us, filename, callback) {
             // draw statelines over drought colors
             context.fillStyle = colors.border;
             context.strokeStyle = colors.border;
-            context.lineWidth = 0.75;
+            context.lineWidth = 1.5;
             context.lineJoin = "round";
 
             context.beginPath();
