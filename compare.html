@@ -117,14 +117,9 @@
         min: 1,
         max: 52,
 
-        change: function(e, ui) {
-            update(e, ui);
-        },
+        change: update,
 
-        slide: function(e, ui) {
-            $('.week-num').text(ui.value + 1);
-            update(e, ui);
-        }
+        slide: update
 
     });
 
