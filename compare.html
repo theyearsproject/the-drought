@@ -12,11 +12,6 @@
     <style type="text/css">
     body { padding-top: 100px; }
 
-    #slider { 
-        margin-top: .75em; 
-        margin-bottom: .75em;
-    }
-
     .year {
         margin-bottom: 1.5em;
     }
@@ -27,6 +22,32 @@
 
     .week.active {
         display: block;
+    }
+
+    /*** slider styles ***/
+
+    #slider { 
+        margin-bottom: .75em;
+    }
+
+    #slider svg {
+        height: 2em;
+    }
+
+    .ui-widget-content {
+        background: none;
+        border: none;
+    }
+
+    path.domain,
+    .tick line {
+        fill: none;
+        stroke: #333;
+        stroke-width: 1;
+    }
+
+    .tick text {
+        color: #333;
     }
 
 
@@ -93,7 +114,8 @@
         });
 
     var slider = $('#slider').slider({
-        max: 51,
+        min: 1,
+        max: 52,
 
         change: function(e, ui) {
             update(e, ui);
@@ -107,14 +129,35 @@
     });
 
     function update(e, ui) {
-        weeks.classed('active', function(d, i) { return ui.value === i; });
+        weeks.classed('active', function(d, i) { return ui.value === i + 1; });
     }
 
     // bits of setup
     slider.slider({ value: weeks[0].length - 1 });
+
+    // add an axis on the slider
+    var x = d3.scale.linear()
+        .domain([1, 52])
+        .range([0, slider.width()]);
+
+    var xAxis = d3.svg.axis()
+        .orient('bottom')
+        .scale(x)
+        .tickFormat(String);
+
+    d3.select(slider[0]).append('svg')
+        .attr('id', 'axis')
+        .call(xAxis);
+
+    // keep the top padding right
     $(window).on('resize', function(e) {
-        $('body').css('padding-top', $('header').height());        
-    }).resize();
+        $('body').css('padding-top', $('header').height());
+        
+        // resize the axis
+        x.range([0, slider.width()]);
+        d3.select('#axis').call(xAxis);
+
+    }).trigger('resize');
 
     </script>
 
