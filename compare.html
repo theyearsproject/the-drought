@@ -176,7 +176,7 @@
 
     // select this once
     var handle = $('#slider a')
-        .tooltip({ title: 'Move me', placement: 'left auto' })
+        .tooltip({ title: 'Move me', placement: 'left auto', animate: true })
         .tooltip('show');
 
     // kill the tooltip once we slide
@@ -220,12 +220,16 @@
     $(window).on('resize', function(e) {
         // keep the top padding right
         $('body').css('padding-top', $('header').height());
-        
+
         // resize the axis
         x.range([0, slider.width()]);
         d3.select('#axis').call(xAxis);
 
     }).trigger('resize');
+
+    setTimeout(function() {
+        handle.tooltip('hide');
+    }, 3000)
 
     </script>
 
