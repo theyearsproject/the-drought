@@ -12,6 +12,8 @@
     <style type="text/css">
     body { padding-top: 100px; }
 
+    h1 { font-size: 2em; }
+
     .year {
         margin-bottom: 1.5em;
     }
@@ -32,6 +34,22 @@
 
     #slider svg {
         height: 2em;
+        cursor: pointer;
+    }
+
+    #slider a,
+    .ui-widget-content .ui-state-default, 
+    .ui-widget-content .ui-state-focus, 
+    .ui-widget-content .ui-state-active,
+    .ui-state-default {
+        cursor: pointer;
+        border-color: rgb(252, 211, 127) !important;
+        background: rgb(255, 170, 0) !important;
+    },
+
+    .ui-state-hover {
+        border-color: rgb(252, 211, 127) !important;
+        background: rgb(255, 170, 0) !important;
     }
 
     .ui-widget-content {
@@ -58,7 +76,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1>The Drought</h1>
-                <p>Move the slider to compare drought conditions week by week over the past 14 years.</p>
+                <p>Move the slider below to compare drought conditions at similar points in the past 14 years.</p>
             </div>
         </div>
         <div class="row">
@@ -77,6 +95,7 @@
     <script src="components/d3/d3.min.js" charset="utf-8"></script>
     <script src="components/jquery/jquery.min.js"></script>
     <script src="components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="components/bootstrap/js/tooltip.js"></script>
 
     <script type="text/javascript">
     var IMG_PATH = "img/drought/";
@@ -85,6 +104,7 @@
         file: d3.time.format('usdm%y%m%d'),
         date: d3.time.format('%b %d, %Y'),
         week: d3.time.format('%Y-%m-%d'),
+        month: d3.time.format('%b')
     };
 
     var nest = d3.nest().key(function(d) {
@@ -119,7 +139,7 @@
 
         change: update,
 
-        slide: update
+        slide: update,
 
     });
 
@@ -130,7 +150,17 @@
     // bits of setup
     slider.slider({ value: weeks[0].length - 1 });
 
+    // select this once
+    var handle = $('#slider a')
+        .tooltip({ title: 'Move me', placement: 'left auto' })
+        .tooltip('show');
+
+    // kill the tooltip once we slide
+    slider.on('slide', function(e, ui) { handle.tooltip('destroy'); });
+
     // add an axis on the slider
+    var daterange = d3.time.tuesdays(new Date(2012, 11, 31), new Date(2013, 11, 31));
+
     var x = d3.scale.linear()
         .domain([1, 52])
         .range([0, slider.width()]);
@@ -138,7 +168,10 @@
     var xAxis = d3.svg.axis()
         .orient('bottom')
         .scale(x)
-        .tickFormat(String);
+        .ticks(9)
+        .tickFormat(function(d, i) {
+            return formats.month(daterange[d]);
+        });
 
     d3.select(slider[0]).append('svg')
         .attr('id', 'axis')
