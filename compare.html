@@ -76,7 +76,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1>The Drought</h1>
-                <p>Move the slider below to compare drought conditions at similar points in the past 14 years.</p>
+                <p>Move the slider below (or use &larr; / &rarr;) to compare drought conditions at similar points in the past 14 years.</p>
             </div>
         </div>
         <div class="row">
@@ -156,7 +156,7 @@
         .tooltip('show');
 
     // kill the tooltip once we slide
-    slider.on('slide', function(e, ui) { handle.tooltip('destroy'); });
+    slider.on('slide slidechange', function(e, ui) { handle.tooltip('destroy'); });
 
     // add an axis on the slider
     var daterange = d3.time.tuesdays(new Date(2012, 11, 31), new Date(2013, 11, 31));
@@ -176,6 +176,19 @@
     d3.select(slider[0]).append('svg')
         .attr('id', 'axis')
         .call(xAxis);
+
+    // key controls
+    d3.select(window).on('keydown', function() {
+        switch (d3.event.keyCode) {
+            case 37: 
+                slider.slider('value', slider.slider('value') - 1);
+                break;
+            case 39: 
+                slider.slider('value', slider.slider('value') + 1);
+                break;
+        }
+    });
+
 
     // keep the top padding right
     $(window).on('resize', function(e) {
