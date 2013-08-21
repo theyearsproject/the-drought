@@ -163,8 +163,7 @@
         max: 52,
 
         change: update,
-
-        slide: update,
+        slide: update
 
     });
 
@@ -172,8 +171,8 @@
         weeks.classed('active', function(d, i) { return ui.value === i + 1; });
     }
 
-    // bits of setup
-    slider.slider({ value: weeks[0].length - 1 });
+    // set slider to latest report
+    slider.slider({ value: weeks[0].length });
 
     // select this once
     var handle = $('#slider a')
@@ -218,8 +217,8 @@
     $('#embed-modal').find('textarea')
         .val('<iframe width="100%" height="600" frameborder="0" src="' + location.href + '"></iframe>');
 
-    // keep the top padding right
     $(window).on('resize', function(e) {
+        // keep the top padding right
         $('body').css('padding-top', $('header').height());
         
         // resize the axis
