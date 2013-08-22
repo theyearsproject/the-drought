@@ -4,81 +4,246 @@
     <title>The Drought</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="components/bootstrap/dist/css/bootstrap.css">
 
+    <link rel="stylesheet" type="text/css" href="components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="components/jquery-ui/themes/ui-lightness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="css/drought.css">
 
+    <style type="text/css">
+    #chart,
+    .ui-state-default, 
+    .ui-widget-content .ui-state-default { 
+        padding: 0;
+        border-radius: 0;
+        background: none;
+     }
+
+     #chart .ui-slider-handle {
+        height: 101%;
+        top: 0;
+        bottom: 0;
+        border-top: 10px solid #aaa;
+        border-bottom: 5px solid #bbb;
+     }
+
+    </style>
+
 </head>
 <body>
-	<div class="container">
-
-		<div class="row">
-			<div id="map" class="span8 col-lg-8">
-                <svg class="overlay"></svg>
-			    <img src="img/drought/usdm130716.png">
-			</div>
-            <div class="caption national span4 col-lg-4 pull-right"></div>
-		</div>
-
-		<div class="row">
-			<div id="chart" class="span12 col-lg-8"></div>
-		</div>
-
-	</div>
-    
-    <script type="x-jst" id="caption-template">
-    <h4><%= formats.date(Week) %></h4>
-    <ul class="drought-levels unstyled">
-        <li><span class="Nothing"></span>No drought: <%= formats.percent(Nothing) %></li>
-        <li><span class="D0"></span>Abnormally Dry: <%= formats.percent(D0) %></li>
-        <li><span class="D1"></span>Moderate: <%= formats.percent(D1) %></li>
-        <li><span class="D2"></span>Severe: <%= formats.percent(D2) %></li>
-        <li><span class="D3"></span>Extreme: <%= formats.percent(D3) %></li>
-        <li><span class="D4"></span>Exceptional: <%= formats.percent(D4) %></li>
-    </ul>
-    </script>
+    <header class="navbar navbar-default navbar-static-top">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm 12">
+                <h1>The Drought</h1>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="row">
+            <div id="map" class="col-lg-8 col-md-12 col-sm-12"></div>
+        </div>
+        <div class="row">
+            <div id="caption" class="col-lg-12 col-md-12 col-sm 12"></div>
+        </div>
+    </div>
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="row">
+            <div id="chart" class="col-lg-12 col-md-12 col-sm 12"></div>
+        </div>
+    </div>
 
     <script src="js/weeks.js"></script>
     <script src="components/underscore/underscore.js"></script>
-    <script src="components/d3/d3.js" charset="utf-8"></script>
-    <script src="components/crossfilter/crossfilter.js"></script>
-    <script src="components/topojson/topojson.js"></script>
-    <script src="js/chart.js"></script>
+    <script src="components/d3/d3.min.js" charset="utf-8"></script>
+    <script src="components/jquery/jquery.min.js"></script>
+    <script src="components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="components/bootstrap/js/tooltip.js"></script>
+    <script src="components/bootstrap/js/modal.js"></script>
 
     <script type="text/javascript">
-    var IMG_PATH = "img/drought/";
+    var IMG_PATH = "img/drought/"
+      , url = "data/csv/us.csv"
+      , margin = {top: 00, right: 0, bottom: 0, left: 0}
+      , height = 200
+      , height = height - margin.top - margin.bottom
+      , width = parseInt(d3.select('#chart').style('width'))
+      , width = width - margin.left - margin.right;
 
-    d3.json('data/us.json', function(err, us) {
+    var formats = {
+        file: d3.time.format('usdm%y%m%d'),
+        date: d3.time.format('%b %d, %Y'),
+        week: d3.time.format('%Y-%m-%d'),
+        percent: function(d) { return d3.round(d) + '%'; }
+    };
 
-        window.us = us;
-
-        var height = parseInt(d3.select('#map img').style('height'))
-          , width = parseInt(d3.select('#map img').style('width'));
-
-        var svg = d3.select('svg.overlay')
-            .style('width', width + 'px')
-            .style('height', height + 'px')
-          .append('g')
-            .attr('class', 'layers')
-            .attr('transform', 'translate(0,0)');
-        
-        var projection = d3.geo.albersUsa()
-            .scale(963)
-            .translate([width / 2, height / 2])
-            .precision(0);
-        
-        var path = d3.geo.path().projection(projection);
-
-        var states = topojson.feature(us, us.objects.states);
-
-        svg.selectAll('path.state')
-            .data(states.features)
-          .enter().append('path')
-            .attr('class', 'state')
-            .attr('d', path);
-
+    // map and slider
+    var images = _.map(WEEKS, function(d) {
+        var img = document.createElement('img');
+        img.src = IMG_PATH + d + '.png';
+        img.className = 'img-responsive';
+        return img;
     });
+
+    var map = $('#map').append(_.last(images));
+
+    var slider = $('#chart').slider({
+
+        max: WEEKS.length - 1,
+
+        change: function(e, ui) {
+            map.html(images[ui.value]);
+        },
+
+        slide: function(e, ui) {
+            map.html(images[ui.value]);
+        }
+    });
+
+    var handle = slider.find('.ui-slider-handle');
+
+    // set the map to the latest image as soon as it's ready
+    _.last(images).onload = function(e) {
+        slider.slider('value', WEEKS.length - 1);
+    }
+
+    // scales and axes
+    var dates = _.map(WEEKS, function(d) {
+        return formats.file.parse(d);
+    });
+
+    var drought = []
+      , extent = d3.extent(dates)
+      , levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
+
+    var x = d3.time.scale()
+        .domain(extent)
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .domain([0, 100]) // dealing in percents
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .orient('bottom')
+        .scale(x)
+        .ticks(7)
+        .tickFormat(formats.date);
+
+    var yAxis = d3.svg.axis()
+        .orient('right')
+        .scale(y)
+        .tickFormat(function(d) { return d + '%'; });
+
+    var area = function(accessor) {
+        return d3.svg.area()
+            .x(function(d) { return x(d.Week); })
+            .y0(height)
+            .y1(function(d) { return y(d[accessor]); });
+    }
+
+    var svg = d3.select('#chart').append('svg')
+        .style('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform', translate(margin.left, margin.top));
+
+    svg.append('defs').append('clipPath')
+        .attr('id', 'clip')
+      .append('rect')
+        .attr('width', width)
+        .attr('height', height);
+
+    svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', translate(0, 0));
+
+    svg.append('g')
+        .attr('class', 'y axis');
+
+    var paths = svg.append('g')
+        .attr('class', 'drought')
+        .attr('clip-path', 'url(#clip)');
+
+    var verticle = svg.append('line')
+        .attr('class', 'verticle')
+        .attr('y1', 0)
+        .attr('y2', height);
+
+    // load it up
+    d3.csv(url).row(function(d) {
+        // numerize
+        // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
+        d.Week = formats.week.parse(d.Week);
+        d.Nothing = +d.Nothing;
+        d['D0-D4'] = +d['D0'];
+        d['D1-D4'] = +d['D1'];
+        d['D2-D4'] = +d['D2'];
+        d['D3-D4'] = +d['D3'];
+        d['D4'] = +d['D4'];
+
+        d['D0'] = d['D0-D4'] - d['D1-D4'];
+        d['D1'] = d['D1-D4'] - d['D2-D4'];
+        d['D2'] = d['D2-D4'] - d['D3-D4'];
+        d['D3'] = d['D3-D4'] - d['D4'];
+
+        return d;
+
+    }).get(function(err, data) {
+        if (err) throw err;
+        // render the chart
+        drought = data;
+
+        _.each(levels, function(level) {
+            paths.append('path')
+                .datum(data)
+                .attr('class', 'drought ' + level)
+                .attr('d', area(level));
+        });
+
+        // add a zoom pane overlay
+        svg.append('rect')
+            .attr('class', 'pane')
+            .attr('width', width)
+            .attr('height', height);
+
+        svg.select('g.x.axis').call(xAxis);
+        svg.select('g.y.axis').call(yAxis);
+    });
+
+    d3.select(window).on('resize', resize);
+
+    // utility functions
+    function resize() {
+        // adjust things when the window size changes
+        height = Math.min(200, innerHeight - $('header').height() - $('#map').height() - $('#caption').height());
+        width = parseInt(d3.select('#chart').style('width'));
+        width = width - margin.left - margin.right;
+
+        // resize the chart
+        x.range([0, width]);
+        y.range([height, 0]);
+
+        svg.select('#clip rect')
+            .attr('height', height)
+            .attr('width', width);
+
+        svg.select('.x.axis').call(xAxis);
+        svg.select('.y.axis').call(yAxis);
+
+        d3.select('#chart').style('height', height + 'px')
+          .select('svg')
+            .style('height', height + 'px')
+            .style('width', width + 'px');
+
+        _.each(levels, function(level) {
+            svg.select('path.drought.' + level)
+                .attr('d', area(level));
+        });
+
+    }
+
+    function translate(x, y) {
+        return "translate(" + x + "," + y + ")";
+    }
+
     </script>
 
 </body>

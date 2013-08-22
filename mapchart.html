@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>The Drought</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="components/bootstrap/dist/css/bootstrap.css">
+
+    <link rel="stylesheet" type="text/css" href="components/jquery-ui/themes/ui-lightness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="css/drought.css">
+
+</head>
+<body>
+	<div class="container">
+
+		<div class="row">
+			<div id="map" class="span8 col-lg-8">
+                <svg class="overlay"></svg>
+			    <img src="img/drought/usdm130716.png">
+			</div>
+            <div class="caption national span4 col-lg-4 pull-right"></div>
+		</div>
+
+		<div class="row">
+			<div id="chart" class="span12 col-lg-8"></div>
+		</div>
+
+	</div>
+    
+    <script type="x-jst" id="caption-template">
+    <h4><%= formats.date(Week) %></h4>
+    <ul class="drought-levels unstyled">
+        <li><span class="Nothing"></span>No drought: <%= formats.percent(Nothing) %></li>
+        <li><span class="D0"></span>Abnormally Dry: <%= formats.percent(D0) %></li>
+        <li><span class="D1"></span>Moderate: <%= formats.percent(D1) %></li>
+        <li><span class="D2"></span>Severe: <%= formats.percent(D2) %></li>
+        <li><span class="D3"></span>Extreme: <%= formats.percent(D3) %></li>
+        <li><span class="D4"></span>Exceptional: <%= formats.percent(D4) %></li>
+    </ul>
+    </script>
+
+    <script src="js/weeks.js"></script>
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/d3/d3.js" charset="utf-8"></script>
+    <script src="components/crossfilter/crossfilter.js"></script>
+    <script src="components/topojson/topojson.js"></script>
+    <script src="js/chart.js"></script>
+
+    <script type="text/javascript">
+    var IMG_PATH = "img/drought/";
+
+    d3.json('data/us.json', function(err, us) {
+
+        window.us = us;
+
+        var height = parseInt(d3.select('#map img').style('height'))
+          , width = parseInt(d3.select('#map img').style('width'));
+
+        var svg = d3.select('svg.overlay')
+            .style('width', width + 'px')
+            .style('height', height + 'px')
+          .append('g')
+            .attr('class', 'layers')
+            .attr('transform', 'translate(0,0)');
+        
+        var projection = d3.geo.albersUsa()
+            .scale(963)
+            .translate([width / 2, height / 2])
+            .precision(0);
+        
+        var path = d3.geo.path().projection(projection);
+
+        var states = topojson.feature(us, us.objects.states);
+
+        svg.selectAll('path.state')
+            .data(states.features)
+          .enter().append('path')
+            .attr('class', 'state')
+            .attr('d', path);
+
+    });
+    </script>
+
+</body>
+</html>
