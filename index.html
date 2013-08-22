@@ -10,6 +10,8 @@
     <link rel="stylesheet" type="text/css" href="css/drought.css">
 
     <style type="text/css">
+    #map { min-height: 200px; }
+
     #chart,
     .ui-state-default, 
     .ui-widget-content .ui-state-default { 
@@ -22,6 +24,8 @@
         height: 101%;
         top: 0;
         bottom: 0;
+        border-left: 2px solid #bbb;
+        border-right: 2px solid #bbb;
         border-top: 10px solid #aaa;
         border-bottom: 5px solid #bbb;
      }
@@ -51,6 +55,18 @@
         </div>
     </div>
 
+    <script type="x-jst" id="caption-template">
+    <h4><%= formats.date(Week) %></h4>
+    <ul class="drought-levels list-unstyled list-inline">
+        <li><span class="Nothing"></span>No drought: <%= formats.percent(Nothing) %></li>
+        <li><span class="D0"></span>Abnormally Dry: <%= formats.percent(D0) %></li>
+        <li><span class="D1"></span>Moderate: <%= formats.percent(D1) %></li>
+        <li><span class="D2"></span>Severe: <%= formats.percent(D2) %></li>
+        <li><span class="D3"></span>Extreme: <%= formats.percent(D3) %></li>
+        <li><span class="D4"></span>Exceptional: <%= formats.percent(D4) %></li>
+    </ul>
+    </script>
+
     <script src="js/weeks.js"></script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/d3/d3.min.js" charset="utf-8"></script>
@@ -62,7 +78,7 @@
     <script type="text/javascript">
     var IMG_PATH = "img/drought/"
       , url = "data/csv/us.csv"
-      , margin = {top: 10, right: 0, bottom: 0, left: 0}
+      , margin = {top: 10, right: 0, bottom: 5, left: 0}
       , height = 200
       , height = height - margin.top - margin.bottom
       , width = parseInt(d3.select('#chart').style('width'))
@@ -70,7 +86,8 @@
 
     var formats = {
         file: d3.time.format('usdm%y%m%d'),
-        date: d3.time.format('%b %Y'),
+        date: d3.time.format('%b %d, %Y'),
+        month: d3.time.format('%b %Y'),
         week: d3.time.format('%Y-%m-%d'),
         percent: function(d) { return d3.round(d) + '%'; }
     };
@@ -85,6 +102,10 @@
 
     var map = $('#map').append(_.last(images));
 
+    var template = d3.select('#caption-template').html()
+      , template = _.template(template)
+      , caption = d3.select('#caption');
+
     var slider = $('#chart').slider({
 
         max: WEEKS.length - 1,
@@ -95,6 +116,7 @@
 
         slide: function(e, ui) {
             map.html(images[ui.value]);
+            caption.html(template(drought[ui.value]));
         }
     });
 
@@ -103,6 +125,7 @@
     // set the map to the latest image as soon as it's ready
     _.last(images).onload = function(e) {
         slider.slider('value', WEEKS.length - 1);
+        resize();
     }
 
     // scales and axes
@@ -126,11 +149,12 @@
         .orient('bottom')
         .scale(x)
         .ticks(7)
-        .tickFormat(formats.date);
+        .tickFormat(formats.month);
 
     var yAxis = d3.svg.axis()
         .orient('right')
         .scale(y)
+        .ticks(5)
         .tickFormat(function(d) { return d + '%'; });
 
     var area = function(accessor) {
@@ -155,11 +179,6 @@
         .attr('class', 'drought')
         .attr('clip-path', 'url(#clip)');
 
-    var verticle = svg.append('line')
-        .attr('class', 'verticle')
-        .attr('y1', 0)
-        .attr('y2', height);
-
     // load it up
     d3.csv(url).row(function(d) {
         // numerize
@@ -182,11 +201,11 @@
     }).get(function(err, data) {
         if (err) throw err;
         // render the chart
-        drought = data;
+        drought = _.sortBy(data, 'Week');
 
         _.each(levels, function(level) {
             paths.append('path')
-                .datum(data)
+                .datum(drought)
                 .attr('class', 'drought ' + level)
                 .attr('d', area(level));
         });
@@ -206,7 +225,7 @@
             .call(yAxis);
     });
 
-    d3.select(window).on('resize', function() { requestAnimationFrame(resize); });
+    $(window).on('resize', function() { requestAnimationFrame(resize); });
 
     // utility functions
     function resize() {
@@ -227,7 +246,8 @@
         svg.select('.x.axis').call(xAxis);
         svg.select('.y.axis').call(yAxis);
 
-        d3.select('#chart').style('height', height + 'px')
+        d3.select('#chart')
+            .style('height', height + 'px')
           .select('svg')
             .style('height', height + 'px')
             .style('width', width + 'px');
