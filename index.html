@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="css/drought.css">
 
     <style type="text/css">
+    h1 { font-size: 2em; }
     #map { min-height: 200px; }
 
     #chart,
@@ -112,6 +113,7 @@
 
         change: function(e, ui) {
             map.html(images[ui.value]);
+            caption.html(template(drought[ui.value]));
         },
 
         slide: function(e, ui) {
