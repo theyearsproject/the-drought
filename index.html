@@ -62,7 +62,7 @@
     <script type="text/javascript">
     var IMG_PATH = "img/drought/"
       , url = "data/csv/us.csv"
-      , margin = {top: 00, right: 0, bottom: 0, left: 0}
+      , margin = {top: 10, right: 0, bottom: 0, left: 0}
       , height = 200
       , height = height - margin.top - margin.bottom
       , width = parseInt(d3.select('#chart').style('width'))
@@ -70,7 +70,7 @@
 
     var formats = {
         file: d3.time.format('usdm%y%m%d'),
-        date: d3.time.format('%b %d, %Y'),
+        date: d3.time.format('%b %Y'),
         week: d3.time.format('%Y-%m-%d'),
         percent: function(d) { return d3.round(d) + '%'; }
     };
@@ -151,13 +151,6 @@
         .attr('width', width)
         .attr('height', height);
 
-    svg.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', translate(0, 0));
-
-    svg.append('g')
-        .attr('class', 'y axis');
-
     var paths = svg.append('g')
         .attr('class', 'drought')
         .attr('clip-path', 'url(#clip)');
@@ -204,16 +197,22 @@
             .attr('width', width)
             .attr('height', height);
 
-        svg.select('g.x.axis').call(xAxis);
-        svg.select('g.y.axis').call(yAxis);
+        svg.append('g')
+            .attr('class', 'x axis')
+            .call(xAxis);
+
+        svg.append('g')
+            .attr('class', 'y axis')
+            .call(yAxis);
     });
 
-    d3.select(window).on('resize', resize);
+    d3.select(window).on('resize', function() { requestAnimationFrame(resize); });
 
     // utility functions
     function resize() {
         // adjust things when the window size changes
         height = Math.min(200, innerHeight - $('header').height() - $('#map').height() - $('#caption').height());
+        height = height - margin.top - margin.bottom;
         width = parseInt(d3.select('#chart').style('width'));
         width = width - margin.left - margin.right;
 
