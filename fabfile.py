@@ -8,8 +8,8 @@ import urllib
 from fabric.api import *
 from lxml import etree
 
-DATE_FORMAT = "usdm%y%m%d"
-SHORT_DATE_FORMAT = "%y%m%d"
+DATE_FORMAT = "usdm%Y%m%d"
+SHORT_DATE_FORMAT = "%Y%m%d"
 
 # http://droughtmonitor.unl.edu/data/shapefiles_m//2013_USDM_M.zip
 #DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
@@ -83,8 +83,6 @@ def load_data(locale='US'):
     </week>
 
     """
-    XML_DATE_FORMAT = "%Y%m%d"
-
     if locale == "US":
         url = "http://droughtmonitor.unl.edu/tabular/total.xml"
 
@@ -108,7 +106,7 @@ def load_data(locale='US'):
 
             # extract a row
             row = dict((e.tag, e.text) for e in week if e.tag in fields)
-            row['Week'] = datetime.datetime.strptime(week.get('date'), XML_DATE_FORMAT).date()
+            row['Week'] = datetime.datetime.strptime(week.get('date'), SHORT_DATE_FORMAT).date()
 
             writer.writerow(row)
 
@@ -183,6 +181,11 @@ def update_all_shapefiles(start=2000, end=2013):
 def update_shapefiles(year=2013):
     """
     Download, unzip and reproject all shapefiles from US Drought Monitor
+
+    Each year gets a zipfile that unpacks to a directory of zipfiles,
+    so we need to unzip the year file, then unzip each week file.
+
+    Weekly zips are named like weekly shapefiles.
     """
     year = str(year)
     url = DROUGHT_URL % {'year': year}
