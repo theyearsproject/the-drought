@@ -44,7 +44,7 @@ Also, Backbone could provide some useful eventing and routing. Permalinks would 
 
 ---
 
-UPdate: I can render images, the timeline is zoomable and I can animate everything (and probably tie everything national together). The problem is that I'm running out of usable space, especially on mobile, and I haven't gotten to any localization yet. Touch events are also tricky. I should pull out some interactivity and focus on mobile first, then add features to the larger version.
+Update: I can render images, the timeline is zoomable and I can animate everything (and probably tie everything national together). The problem is that I'm running out of usable space, especially on mobile, and I haven't gotten to any localization yet. Touch events are also tricky. I should pull out some interactivity and focus on mobile first, then add features to the larger version.
 
 One way I could handle local data is to put it on a separate page altogether, essentially creating a state or county detail page (states might be more interesting). I could recreate the same basic chart and interaction, but I could focus on the map on one place.
 

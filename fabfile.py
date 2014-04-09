@@ -11,7 +11,7 @@ from lxml import etree
 DATE_FORMAT = "usdm%y%m%d"
 SHORT_DATE_FORMAT = "%y%m%d"
 
-# http://droughtmonitor.unl.edu/data/shapefiles_m//2012_USDM_M.zip
+# http://droughtmonitor.unl.edu/data/shapefiles_m//2013_USDM_M.zip
 #DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
 DROUGHT_URL = "http://droughtmonitor.unl.edu/data/shapefiles_m//%(year)s_USDM_M.zip"
 
@@ -83,8 +83,10 @@ def load_data(locale='US'):
     </week>
 
     """
+    XML_DATE_FORMAT = "%Y%m%d"
+
     if locale == "US":
-        url = "http://droughtmonitor.unl.edu/tabular/total_archive.xml"
+        url = "http://droughtmonitor.unl.edu/tabular/total.xml"
 
     else:
         locale = locale.upper()
@@ -106,7 +108,7 @@ def load_data(locale='US'):
 
             # extract a row
             row = dict((e.tag, e.text) for e in week if e.tag in fields)
-            row['Week'] = datetime.datetime.strptime(week.get('date'), SHORT_DATE_FORMAT).date()
+            row['Week'] = datetime.datetime.strptime(week.get('date'), XML_DATE_FORMAT).date()
 
             writer.writerow(row)
 
