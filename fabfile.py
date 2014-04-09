@@ -11,7 +11,9 @@ from lxml import etree
 DATE_FORMAT = "usdm%y%m%d"
 SHORT_DATE_FORMAT = "%y%m%d"
 
-DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
+# http://droughtmonitor.unl.edu/data/shapefiles_m//2012_USDM_M.zip
+#DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
+DROUGHT_URL = "http://droughtmonitor.unl.edu/data/shapefiles_m//%(year)s_USDM_M.zip"
 
 ROOT = os.path.realpath(os.path.dirname(__file__))
 

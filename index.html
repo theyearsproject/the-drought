@@ -114,11 +114,13 @@
         change: function(e, ui) {
             map.html(images[ui.value]);
             caption.html(template(drought[ui.value]));
+            // hide tooltip
         },
 
         slide: function(e, ui) {
             map.html(images[ui.value]);
             caption.html(template(drought[ui.value]));
+            // show a tooltip
         }
     });
 
