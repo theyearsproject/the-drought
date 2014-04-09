@@ -42,7 +42,7 @@ var projection = d3.geo.albersUsa()
     .precision(0);
 
 var shapepath = year ?
-    d3.time.format('usdm%y*.shp')(new Date(year, 1, 1)) :
+    d3.time.format('USDM_%Y*.shp')(new Date(year, 1, 1)) :
     "*.shp";
 
 // let's do this
@@ -125,7 +125,7 @@ function raster(us, filename, callback) {
             context.stroke();
 
             // get an outfile
-            var name = path.basename(filename, '.shp').toLowerCase()
+            var name = path.basename(filename, '.shp')
               , file = fs.createWriteStream(path.join(IMG_DIR, name + '.png'));
 
             // then write the final file

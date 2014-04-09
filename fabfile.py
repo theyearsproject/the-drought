@@ -8,21 +8,21 @@ import urllib
 from fabric.api import *
 from lxml import etree
 
-DATE_FORMAT = "usdm%Y%m%d"
+DATE_FORMAT = "USDM_%Y%m%d_M"
+WEEK_FORMAT = "USDM_%Y%m%d"
 SHORT_DATE_FORMAT = "%Y%m%d"
 
 # http://droughtmonitor.unl.edu/data/shapefiles_m//2013_USDM_M.zip
-#DROUGHT_URL = "http://droughtmonitor.unl.edu/shapefiles_combined/%(year)s/usdm%(year)s.zip"
 DROUGHT_URL = "http://droughtmonitor.unl.edu/data/shapefiles_m//%(year)s_USDM_M.zip"
 
 ROOT = os.path.realpath(os.path.dirname(__file__))
 
 _f = lambda *fn: os.path.join(ROOT, *fn)
 
-env.exclude_requirements = [
+env.exclude_requirements = set([
     'wsgiref', 'readline', 'ipython',
     'git-remote-helpers',
-]
+])
 
 env.repos = {
     'origin': ['master', 'master:gh-pages'],
@@ -129,7 +129,7 @@ def reproject(infile):
     """
     Project a file to EPSG:4326.
     """
-    filename = os.path.basename(infile).lower()
+    filename = os.path.basename(infile)
     files = {
         'outfile': _f('data/shapefiles', filename),
         'infile' : infile
@@ -202,6 +202,16 @@ def update_shapefiles(year=2013):
     # unzip files into a year directory, just to keep things sane
     dest = _f('data/raw/', year)
     local('unzip -u -d %s %s' % (dest, zipfile))
+
+    # each year zip unpacks into a directory of weekly zips
+    # so we need to walk through the directory and unzip each week
+    for zipfile in glob.glob(_f(dest, '*.zip')):
+
+        # just put everything into the same directory for simplicity
+        local('unzip -u -d %s %s' % (dest, zipfile))
+        #base = os.path.basename(zipfile)
+        #name, ext = os.path.splitext(base)
+        #date = datetime.datetime.strptime(name, DATE_FORMAT).date()
 
     reproject_year(year)
 
