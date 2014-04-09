@@ -86,7 +86,7 @@
       , width = width - margin.left - margin.right;
 
     var formats = {
-        file: d3.time.format('USDM_%Y%m%d_M'),
+        file: d3.time.format('USDM_%Y%m%d'),
         date: d3.time.format('%b %d, %Y'),
         month: d3.time.format('%b %Y'),
         week: d3.time.format('%Y-%m-%d'),
@@ -139,7 +139,8 @@
 
     var drought = []
       , extent = d3.extent(dates)
-      , levels = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
+      , levels = ['D0', 'D1', 'D2', 'D3', 'D4']
+      , levels_combined = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
 
     var x = d3.time.scale()
         .domain(extent)
@@ -189,6 +190,7 @@
         // Nothing D0-D4   D1-D4   D2-D4   D3-D4   D4
         d.Week = formats.week.parse(d.Week);
         d.Nothing = +d.Nothing;
+        /***
         d['D0-D4'] = +d['D0'];
         d['D1-D4'] = +d['D1'];
         d['D2-D4'] = +d['D2'];
@@ -199,6 +201,17 @@
         d['D1'] = d['D1-D4'] - d['D2-D4'];
         d['D2'] = d['D2-D4'] - d['D3-D4'];
         d['D3'] = d['D3-D4'] - d['D4'];
+        ***/
+        d['D0'] = +d['D0'];
+        d['D1'] = +d['D1'];
+        d['D2'] = +d['D2'];
+        d['D3'] = +d['D3'];
+        d['D4'] = +d['D4'];
+
+        d['D0-D4'] = d['D0'] + d['D1'] + d['D2'] + d['D3'] + d['D4'];
+        d['D1-D4'] = d['D1'] + d['D2'] + d['D3'] + d['D4'];
+        d['D2-D4'] = d['D2'] + d['D3'] + d['D4'];
+        d['D3-D4'] = d['D3'] + d['D4'];
 
         return d;
 
