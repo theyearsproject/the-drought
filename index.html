@@ -111,18 +111,19 @@
 
         max: WEEKS.length - 1,
 
-        change: function(e, ui) {
-            map.html(images[ui.value]);
-            caption.html(template(drought[ui.value]));
-            // hide tooltip
-        },
+        change: slide,
 
-        slide: function(e, ui) {
-            map.html(images[ui.value]);
-            caption.html(template(drought[ui.value]));
-            // show a tooltip
-        }
+        slide: slide
     });
+
+    function slide(e, ui) {
+        var week = dates[ui.value]
+          , data = drought_index[week];
+
+        map.html(images[ui.value]);
+        caption.html(template(data));
+        // hide tooltip
+    }
 
     var handle = slider.find('.ui-slider-handle');
 
@@ -138,6 +139,7 @@
     });
 
     var drought = []
+      , drought_index = {}
       , extent = d3.extent(dates)
       , levels = ['D0', 'D1', 'D2', 'D3', 'D4']
       , levels_combined = ['D0-D4', 'D1-D4', 'D2-D4', 'D3-D4', 'D4'];
@@ -220,6 +222,10 @@
         // render the chart
         drought = _.sortBy(data, 'Week');
 
+        drought_index = _(drought).chain().map(function(d, i) {
+            return [d.Week, d];
+        }).object().value()
+
         _.each(levels, function(level) {
             paths.append('path')
                 .datum(drought)
@@ -257,7 +263,7 @@
         y.range([height, 0]);
 
         svg.select('#clip rect')
-            .attr('height', height)
+            .attr('height', Math.max(height, 0))
             .attr('width', width);
 
         svg.select('.x.axis').call(xAxis);

@@ -12,6 +12,9 @@ DATE_FORMAT = "USDM_%Y%m%d_M"
 WEEK_FORMAT = "USDM_%Y%m%d"
 SHORT_DATE_FORMAT = "%Y%m%d"
 
+START_YEAR = 2000
+END_YEAR = datetime.datetime.now().year
+
 # http://droughtmonitor.unl.edu/data/shapefiles_m//2013_USDM_M.zip
 DROUGHT_URL = "http://droughtmonitor.unl.edu/data/shapefiles_m//%(year)s_USDM_M.zip"
 
@@ -113,7 +116,7 @@ def load_data(locale='US'):
     print "Wrote file: %s" % filename
 
 
-def raster(start=2000, end=2013):
+def raster(start=START_YEAR, end=END_YEAR):
     """
     Create a raster image for each weekly drought snapshot.
     This runs one year at a time to isolate errors.
@@ -167,7 +170,7 @@ def topojson():
     local('topojson --id-property DM -o %s -- %s' % (_f('data/drought.json'), shapefiles))
 
 
-def update_all_shapefiles(start=2000, end=2013):
+def update_all_shapefiles(start=START_YEAR, end=END_YEAR):
     """
     Run update_shapefiles for years between start and end.
     """
@@ -178,7 +181,7 @@ def update_all_shapefiles(start=2000, end=2013):
         update_shapefiles(year)
 
 
-def update_shapefiles(year=2013):
+def update_shapefiles(year=END_YEAR):
     """
     Download, unzip and reproject all shapefiles from US Drought Monitor
 
