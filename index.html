@@ -129,7 +129,7 @@
 
     // set the map to the latest image as soon as it's ready
     _.last(images).onload = function(e) {
-        slider.slider('value', WEEKS.length - 1);
+        slider.slider('value', images.length - 1);
         resize();
     }
 
